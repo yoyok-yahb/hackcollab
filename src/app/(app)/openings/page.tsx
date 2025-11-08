@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCurrentUser, teamOpenings, users, addMatch } from '@/lib/data';
+import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening } from '@/lib/data';
 import { format, formatDistanceToNow } from 'date-fns';
 import { PlusCircle, Search, MapPin, CalendarClock } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
@@ -16,14 +16,17 @@ import { Input } from '@/components/ui/input';
 
 export default function OpeningsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  // This state will be used to force a re-render when openings are updated
-  const [openingsVersion, setOpeningsVersion] = useState(0);
+  const [openings, setOpenings] = useState<TeamOpening[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const currentUser = getCurrentUser();
 
+  useEffect(() => {
+    setOpenings(getTeamOpenings());
+  }, []);
+
   const handleOpeningCreated = () => {
-    setOpeningsVersion(v => v + 1);
+    setOpenings(getTeamOpenings());
   };
   
   const handleExpressInterest = (openingAuthorId: string, openingId: string, openingTitle: string) => {
@@ -52,7 +55,7 @@ export default function OpeningsPage() {
     });
   }
 
-  const filteredOpenings = teamOpenings.filter(opening => {
+  const filteredOpenings = openings.filter(opening => {
     const searchLower = searchTerm.toLowerCase();
     const author = users.find(u => u.id === opening.authorId);
 
@@ -67,7 +70,7 @@ export default function OpeningsPage() {
   });
 
   return (
-    <div className="container mx-auto p-4 md:p-6" key={openingsVersion}>
+    <div className="container mx-auto p-4 md:p-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold">Team Openings</h1>
         <div className="flex w-full md:w-auto items-center gap-2">

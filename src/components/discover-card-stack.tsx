@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { User } from '@/lib/data';
-import { addMatch, getCurrentUser, teamOpenings } from '@/lib/data';
+import { addMatch, getCurrentUser, getTeamOpenings } from '@/lib/data';
 import { DiscoverCard } from './discover-card';
 import { Button } from './ui/button';
 import { Heart, X } from 'lucide-react';
@@ -22,6 +22,7 @@ export function DiscoverCardStack({ users }: { users: User[] }) {
     setIsAnimating(true);
 
     if (liked) {
+      const teamOpenings = getTeamOpenings();
       const teamOpening = teamOpenings[0];
       const newMatch = addMatch({
         userId1: currentUser.id,

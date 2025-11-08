@@ -235,7 +235,7 @@ export const getUserById = (id: string) => {
 }
 
 
-export let teamOpenings: TeamOpening[] = [
+let teamOpenings: TeamOpening[] = [
   {
     id: 'opening1',
     title: 'AI-Powered Personal Finance Advisor',
@@ -271,38 +271,39 @@ export let teamOpenings: TeamOpening[] = [
   },
 ];
 
-const loadTeamOpenings = () => {
-    if (typeof window !== 'undefined') {
-        const savedOpenings = localStorage.getItem('teamOpenings');
-        if (savedOpenings) {
-            teamOpenings = JSON.parse(savedOpenings).map((o: any) => ({
-                ...o, 
-                createdAt: new Date(o.createdAt), 
-                deadline: new Date(o.deadline)
-            }));
-        } else {
-             localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
-        }
+export const getTeamOpenings = (): TeamOpening[] => {
+    if (typeof window === 'undefined') {
+        return teamOpenings;
+    }
+    const savedOpenings = localStorage.getItem('teamOpenings');
+    if (savedOpenings) {
+        return JSON.parse(savedOpenings).map((o: any) => ({
+            ...o, 
+            createdAt: new Date(o.createdAt), 
+            deadline: new Date(o.deadline)
+        }));
+    } else {
+        localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
+        return teamOpenings;
     }
 }
-// Load once on initial script execution
-loadTeamOpenings();
 
 
-const saveTeamOpenings = () => {
+const saveTeamOpenings = (openings: TeamOpening[]) => {
     if (typeof window !== 'undefined') {
-       localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
+       localStorage.setItem('teamOpenings', JSON.stringify(openings));
    }
 }
 
 export const addTeamOpening = (opening: Omit<TeamOpening, 'id' | 'createdAt'>) => {
+    const currentOpenings = getTeamOpenings();
     const newOpening: TeamOpening = {
       ...opening,
       id: `opening${Date.now()}`,
       createdAt: new Date(),
     };
-    teamOpenings.unshift(newOpening);
-    saveTeamOpenings();
+    const updatedOpenings = [newOpening, ...currentOpenings];
+    saveTeamOpenings(updatedOpenings);
     return newOpening;
 }
 
@@ -375,7 +376,8 @@ const saveMessages = () => {
 }
 
 const addConversationPlaceholder = (match: Match) => {
-    const opening = teamOpenings.find(o => o.id === match.teamOpeningId);
+    const openings = getTeamOpenings();
+    const opening = openings.find(o => o.id === match.teamOpeningId);
     // Don't add placeholder if messages already exist for this conversation
     const conversationId = `conv-${match.id}`;
     const existingMessages = messages.filter(m => m.conversationId === conversationId);
@@ -417,11 +419,12 @@ const getLastMessageForConversation = (conversationId: string): Message | undefi
 export const getConversations = () => {
     const currentUser = getCurrentUser();
     const currentMatches = getMatches();
+    const openings = getTeamOpenings();
     return currentMatches.filter(m => m.userId1 === currentUser.id || m.userId2 === currentUser.id)
         .map(match => {
             const otherUserId = match.userId1 === currentUser.id ? match.userId2 : match.userId1;
             const otherUser = users.find(u => u.id === otherUserId)!;
-            const teamOpening = teamOpenings.find(t => t.id === match.teamOpeningId);
+            const teamOpening = openings.find(t => t.id === match.teamOpeningId);
             const conversationId = `conv-${match.id}`;
             const lastMessage = getLastMessageForConversation(conversationId);
 

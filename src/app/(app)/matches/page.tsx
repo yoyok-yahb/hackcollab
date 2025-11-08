@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { removeMatch, getConversations, teamOpenings, User } from '@/lib/data';
+import { removeMatch, getConversations, getTeamOpenings, User } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, X, Sparkles, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,6 +27,7 @@ export default function MatchesPage() {
   if (!isClient) return null;
 
   const conversations = getConversations();
+  const teamOpenings = getTeamOpenings();
   const matchedUsers = conversations.map(c => ({...c.otherUser, teamOpeningTitle: c.teamOpeningTitle, teamOpeningId: c.teamOpeningId, matchId: c.matchId}));
 
   const groupedMatches = matchedUsers.reduce((acc, user) => {

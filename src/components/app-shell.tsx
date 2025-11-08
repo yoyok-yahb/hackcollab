@@ -54,10 +54,38 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [hasNewMatch, setHasNewMatch] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+        setHasNewMatch(localStorage.getItem('hasNewMatch') === 'true');
+    }
+    
+    const handleStorageChange = () => {
+        if (typeof window !== 'undefined') {
+            setHasNewMatch(localStorage.getItem('hasNewMatch') === 'true');
+        }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    };
+
+  }, []);
 
   const handleLogout = () => {
     logout();
     router.push('/login');
+  };
+
+  const handleMatchesClick = () => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('hasNewMatch', 'false');
+    }
+    setHasNewMatch(false);
+    router.push('/matches');
   };
 
   const currentUser = user ? getCurrentUser() : null;
@@ -79,6 +107,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     )
   }
 
+  const matchesButton = (
+     <Button 
+        variant={hasNewMatch ? "default" : "outline"} 
+        size={isMobile ? 'sm' : 'default'}
+        onClick={handleMatchesClick}
+        className={cn("relative", hasNewMatch && "animate-pulse")}
+      >
+        <Users className={cn("h-4 w-4", !isMobile && "mr-2")} />
+        {!isMobile && 'Your Matches'}
+        {isMobile && hasNewMatch && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+            </span>
+        )}
+      </Button>
+  );
+
   if (isMobile) {
     return (
       <div className="flex h-full flex-col">
@@ -88,14 +134,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <span className="sr-only">Hackathon TeamUp</span>
           </Link>
           <div className="flex items-center gap-2">
-             {pathname === '/discover' && (
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/matches">
-                    <Users className="h-4 w-4 mr-2" />
-                    Your Matches
-                  </Link>
-                </Button>
-              )}
+             {pathname === '/discover' && matchesButton}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -185,12 +224,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <h1 className="text-xl font-semibold capitalize">{getPageTitle()}</h1>
                 <div className="flex items-center gap-4">
                   {pathname === '/discover' && (
-                    <Button variant="outline" asChild>
-                      <Link href="/matches">
-                        <Users className="mr-2 h-5 w-5" />
-                        Your Matches
-                      </Link>
-                    </Button>
+                     <div className="relative">
+                      {matchesButton}
+                      {hasNewMatch && (
+                         <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                        </span>
+                      )}
+                    </div>
                   )}
                   <DropdownMenu>
                       <DropdownMenuTrigger asChild>

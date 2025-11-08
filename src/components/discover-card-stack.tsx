@@ -40,6 +40,11 @@ export function DiscoverCardStack({ users, onReset }: DiscoverCardStackProps) {
         teamOpeningId: teamOpening.id,
       });
 
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hasNewMatch', 'true');
+        window.dispatchEvent(new Event('storage')); // Notify other components
+      }
+
       toast({
         title: "It's a match!",
         description: `You and ${likedUser.name} are matched for "${teamOpening.hackathonName}".`,

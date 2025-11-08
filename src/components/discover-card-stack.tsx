@@ -6,7 +6,7 @@ import type { User } from '@/lib/data';
 import { addMatch, getCurrentUser, getTeamOpenings } from '@/lib/data';
 import { DiscoverCard } from './discover-card';
 import { Button } from './ui/button';
-import { Heart, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from './ui/toast';
@@ -115,7 +115,7 @@ export function DiscoverCardStack({ users }: { users: User[] }) {
           onClick={handleLike}
           disabled={isAnimating}
         >
-          <Heart className="h-10 w-10 fill-current" />
+          <Check className="h-10 w-10" />
         </Button>
       </div>
     </div>

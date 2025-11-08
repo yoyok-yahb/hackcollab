@@ -5,8 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser } from '@/lib/data';
-import { Github, Linkedin, Pencil, Twitter, Briefcase, Award, Lightbulb, Link as LinkIcon, Heart } from 'lucide-react';
-import { ProfileVerification } from '@/components/profile-verification';
+import { Github, Linkedin, Pencil, Twitter, Briefcase, Award, Lightbulb, Link as LinkIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useIsClient } from '@/hooks/use-is-client';
 import { Icons } from '@/components/icons';
@@ -67,8 +66,8 @@ export default function ProfilePage() {
         </CardHeader>
       </Card>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-6">
+        <div className="mt-6 grid grid-cols-1 gap-6">
+            <div className="space-y-6">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Lightbulb className="h-6 w-6 text-primary" /> Skills</CardTitle>
@@ -122,34 +121,6 @@ export default function ProfilePage() {
                 </Card>
 
             </div>
-            <div className="space-y-6">
-                <Card>
-                     <CardHeader>
-                        <CardTitle  className="flex items-center gap-2"><Heart className="h-6 w-6 text-primary" /> Interests & Hobbies</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {user.preferences && user.preferences.length > 0 ? (
-                            <div className="flex flex-wrap gap-2">
-                                {user.preferences.map(pref => (
-                                    <Badge key={pref} variant="outline" className="text-base py-1 px-3">{pref}</Badge>
-                                ))}
-                            </div>
-                        ) : (
-                             <p className="text-muted-foreground">No interests listed yet. Add some from the edit profile page!</p>
-                        )}
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>AI Profile Analysis</CardTitle>
-                         <CardDescription>Analyze this profile for completeness and legitimacy.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ProfileVerification user={user} />
-                    </CardContent>
-                </Card>
-            </div>
         </div>
     </div>
   );
-}

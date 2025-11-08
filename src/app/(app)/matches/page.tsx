@@ -3,22 +3,34 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getConversations } from '@/lib/data';
+import { removeMatch, getConversations } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useIsClient } from '@/hooks/use-is-client';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 export default function MatchesPage() {
-  // We use this hook to prevent a hydration mismatch.
-  // The matches are updated on the client, so we only want to render
-  // the list of matches on the client.
   const isClient = useIsClient();
+  const { toast } = useToast();
+  // Force re-render when a match is removed
+  const [_, setTick] = useState(0); 
+
   if (!isClient) return null;
 
   const conversations = getConversations();
-  const matchedUsers = conversations.map(c => ({...c.otherUser, teamOpeningTitle: c.teamOpeningTitle}));
+  const matchedUsers = conversations.map(c => ({...c.otherUser, teamOpeningTitle: c.teamOpeningTitle, matchId: c.matchId}));
+
+  const handleRemoveMatch = (matchId: string, userName: string) => {
+    removeMatch(matchId);
+    toast({
+        title: "Match Removed",
+        description: `You have removed your match with ${userName}.`,
+    });
+    setTick(tick => tick + 1); // Trigger re-render
+  };
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -30,7 +42,16 @@ export default function MatchesPage() {
           {matchedUsers.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {matchedUsers.map((user) => (
-                <Card key={user.id} className="overflow-hidden flex flex-col">
+                <Card key={user.id} className="overflow-hidden flex flex-col group relative">
+                    <Button 
+                        variant="destructive" 
+                        size="icon" 
+                        className="absolute top-2 right-2 z-10 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRemoveMatch(user.matchId, user.name)}
+                    >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Remove Match</span>
+                    </Button>
                   <div className="relative h-48 w-full">
                     <Image
                       src={user.image.imageUrl}

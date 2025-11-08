@@ -192,6 +192,12 @@ export const addMatch = (match: Omit<Match, 'id' | 'createdAt'>) => {
   return newMatch;
 };
 
+// Function to remove a match by its ID
+export const removeMatch = (matchId: string) => {
+  matches = matches.filter(match => match.id !== matchId);
+};
+
+
 // Function to get all matches
 export const getMatches = () => {
     return matches;
@@ -208,6 +214,7 @@ export const getConversations = () => {
             const teamOpening = teamOpenings.find(t => t.id === match.teamOpeningId);
             return {
                 conversationId: `conv-${match.id}`,
+                matchId: match.id,
                 otherUser,
                 teamOpeningTitle: teamOpening?.title || 'A Project',
                 lastMessage: `You matched for ${teamOpening?.title || 'a project'}.`,

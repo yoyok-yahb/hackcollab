@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { PlusCircle, Trash2, Trophy, Upload } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { useState } from 'react';
 import type { User } from '@/lib/data';
@@ -16,30 +16,29 @@ interface OnboardingStepProps {
 }
 
 export function OnboardingStep4({ onNext, onBack, data, setData }: OnboardingStepProps) {
-  const [experiences, setExperiences] = useState(data.experience ? [{ name: '', description: data.experience, certificate: null }] : [{ name: '', description: '', certificate: null }]);
+  const [experiences, setExperiences] = useState(data.experience ? [{ name: '', description: data.experience }] : [{ name: '', description: '' }]);
 
   const handleAddExperience = () => {
-    setExperiences([...experiences, { name: '', description: '', certificate: null }]);
+    setExperiences([...experiences, { name: '', description: '' }]);
   }
   const handleRemoveExperience = (index: number) => {
     const newExperiences = [...experiences];
     newExperiences.splice(index, 1);
     setExperiences(newExperiences);
-    updateMainData(newExperiences);
   }
 
   const handleExperienceChange = (index: number, field: string, value: string) => {
     const newExperiences = [...experiences];
     (newExperiences[index] as any)[field] = value;
     setExperiences(newExperiences);
-    updateMainData(newExperiences);
   };
   
-  const updateMainData = (exps: typeof experiences) => {
+  const handleNext = () => {
       // For now, let's just combine descriptions into one string.
       // A more robust solution might change the User model.
-      const combinedExperience = exps.map(e => e.description).filter(Boolean).join('\n\n');
+      const combinedExperience = experiences.map(e => e.description).filter(Boolean).join('\n\n');
       setData({ experience: combinedExperience });
+      onNext();
   }
 
   return (
@@ -77,7 +76,7 @@ export function OnboardingStep4({ onNext, onBack, data, setData }: OnboardingSte
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={onBack}>Back</Button>
-        <Button onClick={onNext}>Continue</Button>
+        <Button onClick={handleNext}>Continue</Button>
       </CardFooter>
     </Card>
   );

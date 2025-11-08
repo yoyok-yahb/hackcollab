@@ -1,31 +1,15 @@
 'use client';
-import { useState, use } from 'react';
+import { useState, use, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getCurrentUser, getConversations, User } from '@/lib/data';
+import { getCurrentUser, getConversations, User, Message, addMessage, getMessagesForConversation, getUserById } from '@/lib/data';
 import { ArrowLeft, Loader2, Send, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { generateIcebreaker } from '@/ai/flows/icebreaker-tool';
-
-type Message = {
-  id: string;
-  sender: User;
-  text: string;
-  time: string;
-};
-
-// Mock messages for a conversation
-const getMockMessages = (otherUser: User): Message[] => {
-    const currentUser = getCurrentUser();
-    return [
-        { id: '1', sender: otherUser, text: 'Hey! I saw your profile, you seem like a great fit for our project.', time: '10:30 AM' },
-        { id: '2', sender: currentUser, text: 'Hi! Thanks for reaching out. Your project sounds really interesting.', time: '10:31 AM' },
-    ]
-}
 
 
 export default function ChatPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
@@ -38,13 +22,25 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
   const currentConversation = conversations.find(c => c.conversationId === params.id);
   const currentUser = getCurrentUser();
     
+  const [messages, setMessages] = useState<Message[]>(() => getMessagesForConversation(params.id));
+
+  // Poll for new messages (in a real app, you'd use websockets)
+  useEffect(() => {
+    const interval = setInterval(() => {
+        const newMessages = getMessagesForConversation(params.id);
+        if(newMessages.length !== messages.length) {
+            setMessages(newMessages);
+        }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [params.id, messages.length])
+
+
   if (!currentConversation) {
     return <div className="p-4">Conversation not found.</div>;
   }
   
   const otherUser = currentConversation.otherUser;
-  const [messages, setMessages] = useState<Message[]>(() => getMockMessages(otherUser));
-
 
   const handleGenerateIcebreaker = async () => {
     setIcebreakerLoading(true);
@@ -73,17 +69,20 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
-    const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      sender: currentUser,
+    const newMessage = addMessage({
+      conversationId: params.id,
+      senderId: currentUser.id,
       text: inputMessage.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
+    });
 
     setMessages([...messages, newMessage]);
     setInputMessage('');
   }
 
+  const getSender = (senderId: string): User | undefined => {
+    if (senderId === currentUser.id) return currentUser;
+    return getUserById(senderId);
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -102,36 +101,41 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
       </header>
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={cn(
-                'flex items-end gap-2',
-                message.sender.id === currentUser.id ? 'justify-end' : 'justify-start'
-              )}
-            >
-              {message.sender.id !== currentUser.id && (
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={message.sender.image.imageUrl} alt={message.sender.name} />
-                  <AvatarFallback>{message.sender.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-              )}
-              <div
+          {messages.map((message) => {
+            const sender = getSender(message.senderId);
+            if (!sender) return null;
+
+            return (
+                <div
+                key={message.id}
                 className={cn(
-                  'max-w-xs rounded-lg p-3 text-sm',
-                  message.sender.id === currentUser.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-card'
+                    'flex items-end gap-2',
+                    message.senderId === currentUser.id ? 'justify-end' : 'justify-start'
                 )}
-              >
-                <p>{message.text}</p>
-                <p className={cn(
-                    "text-xs mt-1",
-                     message.sender.id === currentUser.id ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                )}>{message.time}</p>
-              </div>
-            </div>
-          ))}
+                >
+                {message.senderId !== currentUser.id && (
+                    <Avatar className="h-8 w-8">
+                    <AvatarImage src={sender.image.imageUrl} alt={sender.name} />
+                    <AvatarFallback>{sender.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                )}
+                <div
+                    className={cn(
+                    'max-w-xs rounded-lg p-3 text-sm',
+                    message.senderId === currentUser.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-card'
+                    )}
+                >
+                    <p>{message.text}</p>
+                    <p className={cn(
+                        "text-xs mt-1",
+                        message.senderId === currentUser.id ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    )}>{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+                </div>
+            )
+          })}
         </div>
       </ScrollArea>
       <footer className="border-t bg-background p-4">

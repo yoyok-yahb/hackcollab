@@ -257,7 +257,7 @@ const saveMatches = () => {
 export const addMatch = (match: Omit<Match, 'id' | 'createdAt'>) => {
   const newMatch: Match = {
     ...match,
-    id: `match${matches.length + 1}`,
+    id: `match${Date.now()}`,
     createdAt: new Date(),
   };
   matches.push(newMatch);
@@ -277,6 +277,41 @@ export const getMatches = () => {
     return matches;
 }
 
+let messages: Message[] = [];
+if (typeof window !== 'undefined') {
+    const savedMessages = localStorage.getItem('messages');
+    if (savedMessages) {
+        messages = JSON.parse(savedMessages).map((m: any) => ({...m, createdAt: new Date(m.createdAt)}));
+    }
+}
+
+const saveMessages = () => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('messages', JSON.stringify(messages));
+    }
+}
+
+export const getMessagesForConversation = (conversationId: string) => {
+    return messages
+        .filter(m => m.conversationId === conversationId)
+        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+}
+
+export const addMessage = (message: Omit<Message, 'id' | 'createdAt'>) => {
+    const newMessage: Message = {
+        ...message,
+        id: `msg-${Date.now()}`,
+        createdAt: new Date(),
+    };
+    messages.push(newMessage);
+    saveMessages();
+    return newMessage;
+}
+
+const getLastMessageForConversation = (conversationId: string): Message | undefined => {
+    return getMessagesForConversation(conversationId).pop();
+}
+
 
 export const getConversations = () => {
     const currentUser = getCurrentUser();
@@ -286,13 +321,16 @@ export const getConversations = () => {
             const otherUserId = match.userId1 === currentUser.id ? match.userId2 : match.userId1;
             const otherUser = users.find(u => u.id === otherUserId)!;
             const teamOpening = teamOpenings.find(t => t.id === match.teamOpeningId);
+            const conversationId = `conv-${match.id}`;
+            const lastMessage = getLastMessageForConversation(conversationId);
+
             return {
-                conversationId: `conv-${match.id}`,
+                conversationId,
                 matchId: match.id,
                 otherUser,
                 teamOpeningTitle: teamOpening?.title || 'A Project',
-                lastMessage: `You matched for ${teamOpening?.title || 'a project'}.`,
-                lastMessageAt: match.createdAt
+                lastMessage: lastMessage?.text || `You matched for ${teamOpening?.title || 'a project'}.`,
+                lastMessageAt: lastMessage?.createdAt || match.createdAt
             }
         })
         .sort((a,b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime())

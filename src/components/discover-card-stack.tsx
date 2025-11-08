@@ -49,8 +49,8 @@ export function DiscoverCardStack({ users, onReset }: DiscoverCardStackProps) {
         title: "It's a match!",
         description: `You and ${likedUser.name} are matched for "${teamOpening.hackathonName}".`,
         action: (
-          <ToastAction asChild altText="Message">
-            <Link href={`/messages/conv-match-${newMatch.id}`}>Message</Link>
+          <ToastAction asChild altText="See Matches">
+            <Link href="/matches">See Matches</Link>
           </ToastAction>
         ),
       });

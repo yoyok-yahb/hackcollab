@@ -356,8 +356,13 @@ const saveMessages = () => {
 
 const addConversationPlaceholder = (match: Match) => {
     const opening = teamOpenings.find(o => o.id === match.teamOpeningId);
+    // Don't add placeholder if messages already exist for this conversation
+    const conversationId = `conv-${match.id}`;
+    const existingMessages = messages.filter(m => m.conversationId === conversationId);
+    if(existingMessages.length > 0) return;
+
     addMessage({
-        conversationId: `conv-${match.id}`,
+        conversationId: conversationId,
         senderId: 'system',
         text: `You matched for "${opening?.title || 'a project'}". Say hi!`
     });
@@ -403,6 +408,7 @@ export const getConversations = () => {
             return {
                 conversationId,
                 matchId: match.id,
+                teamOpeningId: teamOpening?.id,
                 otherUser,
                 teamOpeningTitle: teamOpening?.title || 'A Project',
                 lastMessage: lastMessage?.text || `You matched for ${teamOpening?.title || 'a project'}.`,

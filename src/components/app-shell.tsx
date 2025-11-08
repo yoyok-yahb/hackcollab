@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -13,6 +14,7 @@ import {
   Sparkles,
   User as UserIcon,
   Users,
+  Bot,
 } from 'lucide-react';
 
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -43,6 +45,7 @@ const navItems = [
   { href: '/discover', icon: Sparkles, label: 'For You' },
   { href: '/messages', icon: MessageCircle, label: 'Messages' },
   { href: '/openings', icon: Briefcase, label: 'Openings' },
+  { href: '/learn', icon: Bot, label: 'Learn' },
   { href: '/profile', icon: UserIcon, label: 'Profile' },
 ];
 
@@ -125,7 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
         <main className="flex-1 overflow-y-auto">{children}</main>
         <footer className="sticky bottom-0 z-10 border-t bg-background">
-          <nav className="grid grid-cols-4 items-center justify-items-center px-2 py-1">
+          <nav className="grid grid-cols-5 items-center justify-items-center px-2 py-1">
             {navItems.map((item) => (
               <Link
                 key={item.href}

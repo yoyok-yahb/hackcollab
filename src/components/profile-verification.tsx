@@ -8,6 +8,7 @@ import { ShieldCheck, ShieldAlert, Loader2, Info } from 'lucide-react';
 import type { User } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 export function ProfileVerification({ user }: { user: User }) {
   const [isLoading, setIsLoading] = useState(false);

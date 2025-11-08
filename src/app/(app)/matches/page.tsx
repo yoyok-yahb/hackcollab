@@ -236,7 +236,3 @@ export default function MatchesPage() {
     </div>
   );
 }
-
-    
-
-    

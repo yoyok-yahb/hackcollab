@@ -4,8 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getCurrentUser, getConversations, User, Message, addMessage, getMessagesForConversation, getUserById } from '@/lib/data';
-import { ArrowLeft, Loader2, Send, ShieldAlert, Sparkles } from 'lucide-react';
+import { getCurrentUser, getConversations, User, Message, addMessage, getMessagesForConversation, getUserById, getTeamOpenings, TeamOpening } from '@/lib/data';
+import { ArrowLeft, Loader2, Send, ShieldAlert, Sparkles, Users } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -20,9 +20,37 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
   const [messageSending, setMessageSending] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
   
-  const conversations = getConversations();
-  const currentConversation = conversations.find(c => c.conversationId === params.id);
   const currentUser = getCurrentUser();
+  const conversations = getConversations();
+  const allOpenings = getTeamOpenings();
+  
+  const isGroupChat = params.id.startsWith('conv-group-');
+  let currentConversation: any;
+  let chatParticipants: User[] = [];
+  let chatTitle: string = '';
+  let chatImage: string | null = null;
+
+  if (isGroupChat) {
+    const openingId = params.id.replace('conv-group-', '');
+    const opening = allOpenings.find(o => o.id === openingId);
+    if (opening) {
+        currentConversation = opening;
+        chatTitle = opening.title;
+        const author = getUserById(opening.authorId);
+        const members = opening.approvedMembers.map(id => getUserById(id)).filter(Boolean) as User[];
+        if (author) {
+            chatParticipants = [author, ...members];
+        }
+    }
+  } else {
+     const conv = conversations.find(c => c.conversationId === params.id);
+     if (conv) {
+        currentConversation = conv;
+        chatTitle = conv.otherUser.name;
+        chatImage = conv.otherUser.image.imageUrl;
+        chatParticipants = [currentUser, conv.otherUser];
+     }
+  }
     
   const [messages, setMessages] = useState<Message[]>(() => getMessagesForConversation(params.id));
 
@@ -42,14 +70,12 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
     return <div className="p-4">Conversation not found.</div>;
   }
   
-  const otherUser = currentConversation.otherUser;
-
   const handleGenerateIcebreaker = async () => {
     setIcebreakerLoading(true);
     try {
       const result = await generateIcebreaker({
         userProfile: JSON.stringify(currentUser),
-        teamOpening: "Looking for a skilled teammate for a hackathon project.",
+        teamOpening: isGroupChat ? JSON.stringify(currentConversation) : "Looking for a skilled teammate for a hackathon project.",
       });
       setInputMessage(result.icebreakerSuggestion);
       toast({
@@ -110,6 +136,12 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
     return getUserById(senderId);
   }
 
+  const getParticipantCount = () => {
+    if (!isGroupChat) return 'Direct Message';
+    const count = new Set(chatParticipants.map(p => p.id)).size;
+    return `${count} members`;
+  }
+
   return (
     <div className="flex flex-col h-full">
       <header className="flex items-center gap-4 border-b bg-background p-3">
@@ -117,12 +149,20 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
             <Link href="/messages"><ArrowLeft className="h-6 w-6" /></Link>
         </Button>
         <Avatar>
-          <AvatarImage src={otherUser.image.imageUrl} alt={otherUser.name} />
-          <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
+            {chatImage ? (
+                <>
+                    <AvatarImage src={chatImage} alt={chatTitle} />
+                    <AvatarFallback>{chatTitle.charAt(0)}</AvatarFallback>
+                </>
+            ) : (
+                <span className="flex h-full w-full items-center justify-center rounded-full bg-muted">
+                    <Users className="h-6 w-6 text-muted-foreground" />
+                </span>
+            )}
         </Avatar>
         <div className="flex-1">
-          <p className="font-semibold">{otherUser.name}</p>
-          <p className="text-xs text-muted-foreground">Active now</p>
+          <p className="font-semibold">{chatTitle}</p>
+          <p className="text-xs text-muted-foreground">{getParticipantCount()}</p>
         </div>
       </header>
       <ScrollArea className="flex-1 p-4">
@@ -130,6 +170,12 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
           {messages.map((message) => {
             const sender = getSender(message.senderId);
             if (!sender) return null;
+
+            if (sender.id === 'system') {
+                return (
+                    <div key={message.id} className="text-center text-xs text-muted-foreground my-2">{message.text}</div>
+                )
+            }
 
             return (
                 <div
@@ -153,6 +199,9 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
                         : 'bg-card'
                     )}
                 >
+                    {isGroupChat && message.senderId !== currentUser.id && (
+                        <p className="text-xs font-semibold mb-1">{sender.name}</p>
+                    )}
                     <p>{message.text}</p>
                     <p className={cn(
                         "text-xs mt-1",

@@ -229,6 +229,9 @@ export const getCurrentUser = (): User => {
 
 // Function to get a user by their ID
 export const getUserById = (id: string) => {
+    if (id === 'system') {
+      return { id: 'system', name: 'System', image: { imageUrl: '', imageHint: '', id: '', description: '' } };
+    }
     if (id === getCurrentUser().id) {
         return getCurrentUser();
     }
@@ -288,11 +291,16 @@ export const getTeamOpenings = (): TeamOpening[] => {
     if (typeof window === 'undefined') {
         return teamOpenings;
     }
-    const savedOpenings = localStorage.getItem('teamOpenings');
-    if (savedOpenings) {
-        return parseOpeningDates(JSON.parse(savedOpenings));
-    } else {
-        localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
+    try {
+        const savedOpenings = localStorage.getItem('teamOpenings');
+        if (savedOpenings) {
+            return parseOpeningDates(JSON.parse(savedOpenings));
+        } else {
+            localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
+            return teamOpenings;
+        }
+    } catch (e) {
+        console.error("Failed to get team openings from localStorage", e);
         return teamOpenings;
     }
 }
@@ -305,15 +313,19 @@ const saveTeamOpenings = (openings: TeamOpening[]) => {
 }
 
 export const addTeamOpening = (opening: Omit<TeamOpening, 'id' | 'createdAt' | 'approvedMembers'>) => {
-    const currentOpenings = getTeamOpenings();
+    let currentOpenings = getTeamOpenings();
     const newOpening: TeamOpening = {
       ...opening,
       id: `opening${Date.now()}`,
       createdAt: new Date(),
       approvedMembers: [],
     };
-    const updatedOpenings = [newOpening, ...currentOpenings];
-    saveTeamOpenings(updatedOpenings);
+    currentOpenings = [newOpening, ...currentOpenings];
+    saveTeamOpenings(currentOpenings);
+    
+    // Create a group chat for the new opening
+    addGroupChatPlaceholder(newOpening);
+
     return newOpening;
 }
 
@@ -330,6 +342,15 @@ export const approveMemberForOpening = (openingId: string, userId: string) => {
       opening.approvedMembers.push(userId);
       openings[openingIndex] = opening;
       saveTeamOpenings(openings);
+
+      const user = getUserById(userId);
+      if (user) {
+        addMessage({
+            conversationId: `conv-group-${openingId}`,
+            senderId: 'system',
+            text: `${user.name} has been added to the team.`
+        });
+      }
     }
   }
 };
@@ -406,7 +427,7 @@ const addConversationPlaceholder = (match: Match) => {
     const openings = getTeamOpenings();
     const opening = openings.find(o => o.id === match.teamOpeningId);
     // Don't add placeholder if messages already exist for this conversation
-    const conversationId = `conv-${match.id}`;
+    const conversationId = `conv-match-${match.id}`;
     const existingMessages = messages.filter(m => m.conversationId === conversationId);
     if(existingMessages.length > 0) return;
 
@@ -417,10 +438,22 @@ const addConversationPlaceholder = (match: Match) => {
     });
 }
 
+const addGroupChatPlaceholder = (opening: TeamOpening) => {
+    const conversationId = `conv-group-${opening.id}`;
+    const existingMessages = messages.filter(m => m.conversationId === conversationId);
+    if(existingMessages.length > 0) return;
+
+    addMessage({
+        conversationId,
+        senderId: 'system',
+        text: `Group chat for "${opening.title}" created.`,
+    });
+};
+
 
 export const getMessagesForConversation = (conversationId: string) => {
     return messages
-        .filter(m => m.conversationId === conversationId && m.senderId !== 'system')
+        .filter(m => m.conversationId === conversationId)
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 }
 
@@ -452,7 +485,7 @@ export const getConversations = () => {
             const otherUserId = match.userId1 === currentUser.id ? match.userId2 : match.userId1;
             const otherUser = users.find(u => u.id === otherUserId)!;
             const teamOpening = openings.find(t => t.id === match.teamOpeningId);
-            const conversationId = `conv-${match.id}`;
+            const conversationId = `conv-match-${match.id}`;
             const lastMessage = getLastMessageForConversation(conversationId);
 
             return {
@@ -466,4 +499,25 @@ export const getConversations = () => {
             }
         })
         .sort((a,b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime())
+}
+
+export const getGroupConversations = () => {
+    const currentUser = getCurrentUser();
+    const allOpenings = getTeamOpenings();
+
+    // User is part of a group chat if they created the opening OR if they are an approved member
+    const userOpenings = allOpenings.filter(o => o.authorId === currentUser.id || o.approvedMembers.includes(currentUser.id));
+
+    return userOpenings.map(opening => {
+        const conversationId = `conv-group-${opening.id}`;
+        const lastMessage = getLastMessageForConversation(conversationId);
+
+        return {
+            conversationId,
+            opening,
+            lastMessage: lastMessage?.text || `Group chat for "${opening.title}"`,
+            lastMessageAt: lastMessage?.createdAt || opening.createdAt,
+        };
+    })
+    .sort((a,b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime());
 }

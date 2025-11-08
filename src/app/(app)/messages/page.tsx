@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getConversations } from '@/lib/data';
+import { getConversations, getGroupConversations } from '@/lib/data';
 import { useIsClient } from '@/hooks/use-is-client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users } from 'lucide-react';
 
 export default function MessagesPage() {
   const isClient = useIsClient();
@@ -23,46 +25,91 @@ export default function MessagesPage() {
     );
   }
   const conversations = getConversations();
+  const groupConversations = getGroupConversations();
+
 
   return (
     <div className="h-full flex flex-col">
-       <div className="p-4 md:p-6">
+       <div className="p-4 md:p-6 border-b">
         <h1 className="text-2xl font-bold">Messages</h1>
        </div>
-        <div className="flex-1 overflow-y-auto">
-          {conversations.length > 0 ? (
-            <ul className="divide-y">
-              {conversations.map(({ conversationId, otherUser, lastMessage, lastMessageAt }) => (
-                <li key={conversationId}>
-                  <Link href={`/messages/${conversationId}`} className="flex items-center gap-4 p-4 hover:bg-accent transition-colors">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={otherUser.image.imageUrl} alt={otherUser.name} />
-                      <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-baseline justify-between">
-                        <p className="font-semibold">{otherUser.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(lastMessageAt, { addSuffix: true })}
+        <Tabs defaultValue="direct" className="flex-1 flex flex-col">
+            <TabsList className="m-4">
+                <TabsTrigger value="direct">Direct Messages</TabsTrigger>
+                <TabsTrigger value="groups">Group Chats</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="direct" className="flex-1 overflow-y-auto mt-0">
+                {conversations.length > 0 ? (
+                    <ul className="divide-y">
+                    {conversations.map(({ conversationId, otherUser, lastMessage, lastMessageAt }) => (
+                        <li key={conversationId}>
+                        <Link href={`/messages/${conversationId}`} className="flex items-center gap-4 p-4 hover:bg-accent transition-colors">
+                            <Avatar className="h-12 w-12">
+                            <AvatarImage src={otherUser.image.imageUrl} alt={otherUser.name} />
+                            <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                            <div className="flex items-baseline justify-between">
+                                <p className="font-semibold">{otherUser.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(lastMessageAt, { addSuffix: true })}
+                                </p>
+                            </div>
+                            <p className="text-sm text-muted-foreground truncate">
+                                {lastMessage}
+                            </p>
+                            </div>
+                        </Link>
+                        </li>
+                    ))}
+                    </ul>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                        <h3 className="text-xl font-semibold">No direct messages yet</h3>
+                        <p className="mt-2 text-muted-foreground">
+                            Match with someone to start a conversation.
                         </p>
-                      </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {lastMessage}
-                      </p>
                     </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-             <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                <h3 className="text-xl font-semibold">No messages yet</h3>
-                <p className="mt-2 text-muted-foreground">
-                    Match with someone to start a conversation.
-                </p>
-            </div>
-          )}
-        </div>
+                )}
+            </TabsContent>
+
+             <TabsContent value="groups" className="flex-1 overflow-y-auto mt-0">
+                {groupConversations.length > 0 ? (
+                    <ul className="divide-y">
+                    {groupConversations.map(({ conversationId, opening, lastMessage, lastMessageAt }) => (
+                        <li key={conversationId}>
+                        <Link href={`/messages/${conversationId}`} className="flex items-center gap-4 p-4 hover:bg-accent transition-colors">
+                            <Avatar className="h-12 w-12">
+                                <span className="flex h-full w-full items-center justify-center rounded-full bg-muted">
+                                    <Users className="h-6 w-6 text-muted-foreground" />
+                                </span>
+                            </Avatar>
+                            <div className="flex-1">
+                            <div className="flex items-baseline justify-between">
+                                <p className="font-semibold">{opening.title}</p>
+                                <p className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(lastMessageAt, { addSuffix: true })}
+                                </p>
+                            </div>
+                            <p className="text-sm text-muted-foreground truncate">
+                                {lastMessage}
+                            </p>
+                            </div>
+                        </Link>
+                        </li>
+                    ))}
+                    </ul>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                        <h3 className="text-xl font-semibold">No group chats yet</h3>
+                        <p className="mt-2 text-muted-foreground">
+                            Create or join a team opening to start a group conversation.
+                        </p>
+                    </div>
+                )}
+            </TabsContent>
+        </Tabs>
     </div>
   );
 }

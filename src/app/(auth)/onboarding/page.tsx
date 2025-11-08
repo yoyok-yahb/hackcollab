@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { OnboardingStep1 } from '@/components/onboarding/step1-personal-details';
 import { OnboardingStep2 } from '@/components/onboarding/step2-skills';
 import { OnboardingStep3 } from '@/components/onboarding/step3-projects';
@@ -7,6 +7,7 @@ import { OnboardingStep4 } from '@/components/onboarding/step4-experience';
 import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
 import { saveCurrentUser, getCurrentUser, User } from '@/lib/data';
+import { Icons } from '@/components/icons';
 
 const steps = [
     { component: OnboardingStep1, title: "Personal Details" },
@@ -45,8 +46,15 @@ const getInitialData = (): Partial<User> => {
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [onboardingData, setOnboardingData] = useState<Partial<User>>(getInitialData);
+  const [onboardingData, setOnboardingData] = useState<Partial<User>>({});
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    // This effect runs only on the client
+    setOnboardingData(getInitialData());
+    setIsClient(true);
+  }, []);
 
   const updateOnboardingData = (newData: Partial<User>) => {
     setOnboardingData(prev => ({...prev, ...newData}));
@@ -67,6 +75,15 @@ export default function OnboardingPage() {
       setCurrentStep(currentStep - 1);
     }
   };
+  
+  if (!isClient) {
+    return (
+        <div className="flex h-screen w-screen flex-col items-center justify-center bg-background text-foreground">
+            <Icons.logo className="h-12 w-12 text-primary animate-pulse" />
+            <p className="mt-4 text-lg">Loading your experience...</p>
+        </div>
+    );
+  }
 
   const CurrentStepComponent = steps[currentStep].component;
 

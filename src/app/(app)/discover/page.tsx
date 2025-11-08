@@ -49,12 +49,7 @@ export default function DiscoverPage() {
       
       setRankedUsers(sortedUsers);
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "AI Ranking Failed",
-        description: "Could not rank potential teammates. Displaying default order.",
-      });
-      // Fallback to default order
+      // Fallback to default order without showing a toast
       const currentUser = getCurrentUser();
       const currentMatches = getMatches();
       const matchedUserIds = new Set(

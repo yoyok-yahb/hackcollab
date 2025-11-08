@@ -79,7 +79,7 @@ const getUserImage = (id: string): ImagePlaceholder => {
   return PlaceHolderImages.find((img) => img.id === id) || PlaceHolderImages[1];
 };
 
-export let users: User[] = [
+let initialUsers: User[] = [
   {
     id: 'user1',
     name: 'Alice',
@@ -184,10 +184,17 @@ export let users: User[] = [
   }
 ];
 
+export let users: User[] = [];
+
 if (typeof window !== 'undefined') {
     const savedUsers = localStorage.getItem('users');
     if (savedUsers) {
-        users = JSON.parse(savedUsers);
+        users = JSON.parse(savedUsers).map((user: any) => ({
+            ...user,
+            rating: user.rating || { average: 0, count: 0 } // Ensure rating object exists
+        }));
+    } else {
+        users = initialUsers;
     }
 }
 
@@ -717,7 +724,3 @@ export const updateTask = (updatedTask: Task): Task => {
     saveTeamOpenings(openings);
     return updatedTask;
 }
-
-    
-
-    

@@ -1,12 +1,13 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening, getUserById, deleteTeamOpening, removeMemberFromOpening } from '@/lib/data';
+import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening, getUserById, deleteTeamOpening, removeMemberFromOpening, updateTeamOpening } from '@/lib/data';
 import { format, formatDistanceToNow } from 'date-fns';
-import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Trash2, X, Sparkles, Loader2, ExternalLink } from 'lucide-react';
+import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Trash2, X, Sparkles, Loader2, ExternalLink, Pencil } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
@@ -16,10 +17,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { findBestOpening } from '@/ai/flows/find-best-opening';
 import { cn } from '@/lib/utils';
+import { EditOpeningDialog } from '@/components/edit-opening-dialog';
 
 
 export default function OpeningsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [editingOpening, setEditingOpening] = useState<TeamOpening | null>(null);
   const [openings, setOpenings] = useState<TeamOpening[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [tick, setTick] = useState(0);
@@ -210,9 +213,12 @@ export default function OpeningsPage() {
             <CardFooter>
             {isMyOpening ? (
                 <div className="w-full flex gap-2">
+                    <Button className="flex-1" variant="outline" onClick={() => setEditingOpening(opening)}>
+                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                    </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button className="w-full" variant="destructive">
+                            <Button className="flex-1" variant="destructive">
                                 <Trash2 className="mr-2 h-4 w-4" /> Close
                             </Button>
                         </AlertDialogTrigger>
@@ -317,6 +323,18 @@ export default function OpeningsPage() {
             </AccordionContent>
         </AccordionItem>
       </Accordion>
+      
+      {editingOpening && (
+        <EditOpeningDialog
+            open={!!editingOpening}
+            onOpenChange={(open) => !open && setEditingOpening(null)}
+            onOpeningUpdated={() => {
+                setEditingOpening(null);
+                forceRerender();
+            }}
+            opening={editingOpening}
+        />
+      )}
 
     </div>
   );

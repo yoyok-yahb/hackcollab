@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, ReactNode, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { updateTeamOpening, TeamOpening } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2, Link as LinkIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar } from './ui/calendar';
 import { format } from 'date-fns';
@@ -30,50 +30,53 @@ interface EditOpeningDialogProps {
 }
 
 export function EditOpeningDialog({ open, onOpenChange, onOpeningUpdated, opening }: EditOpeningDialogProps) {
-  const [title, setTitle] = useState(opening.title);
-  const [projectIdea, setProjectIdea] = useState(opening.projectIdea);
-  const [requiredRoles, setRequiredRoles] = useState(opening.requiredRoles.join(', '));
-  const [techStack, setTechStack] = useState(opening.techStack.join(', '));
-  const [location, setLocation] = useState(opening.location);
-  const [deadline, setDeadline] = useState<Date | undefined>(opening.deadline ? new Date(opening.deadline) : undefined);
-  const [hackathonEndDate, setHackathonEndDate] = useState<Date | undefined>(opening.hackathonEndDate ? new Date(opening.hackathonEndDate) : undefined);
+  const [data, setData] = useState<Partial<TeamOpening>>({});
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
-      setTitle(opening.title);
-      setProjectIdea(opening.projectIdea);
-      setRequiredRoles(opening.requiredRoles.join(', '));
-      setTechStack(opening.techStack.join(', '));
-      setLocation(opening.location);
-      setDeadline(opening.deadline ? new Date(opening.deadline) : undefined);
-      setHackathonEndDate(opening.hackathonEndDate ? new Date(opening.hackathonEndDate) : undefined);
+      setData({
+        ...opening,
+        deadline: opening.deadline ? new Date(opening.deadline) : undefined,
+        hackathonEndDate: opening.hackathonEndDate ? new Date(opening.hackathonEndDate) : undefined,
+        requiredRoles: opening.requiredRoles.join(', '),
+        techStack: opening.techStack.join(', '),
+      });
     }
   }, [open, opening]);
 
+  const handleDataChange = (field: keyof typeof data, value: any) => {
+    setData(prev => ({...prev, [field]: value}));
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !projectIdea || !location || !deadline || !hackathonEndDate) {
-      toast({
+    if (!data.hackathonName || !data.location || !data.deadline || !data.hackathonEndDate) {
+       toast({
         variant: 'destructive',
         title: 'Missing Fields',
-        description: 'Please fill out all fields, including deadline and hackathon end date.',
+        description: 'Please fill out all required event details.',
       });
       return;
     }
+    if (!data.requiredRoles || !data.techStack) {
+       toast({
+        variant: 'destructive',
+        title: 'Missing Fields',
+        description: 'Please specify the required roles and tech stack.',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
         const updatedOpening: TeamOpening = {
             ...opening,
-            title,
-            projectIdea,
-            requiredRoles: requiredRoles.split(',').map(s => s.trim()).filter(Boolean),
-            techStack: techStack.split(',').map(s => s.trim()).filter(Boolean),
-            location,
-            deadline,
-            hackathonEndDate,
+            ...data,
+            requiredRoles: Array.isArray(data.requiredRoles) ? data.requiredRoles : data.requiredRoles.split(',').map(s => s.trim()).filter(Boolean),
+            techStack: Array.isArray(data.techStack) ? data.techStack : data.techStack.split(',').map(s => s.trim()).filter(Boolean),
         };
 
         updateTeamOpening(updatedOpening);
@@ -106,52 +109,39 @@ export function EditOpeningDialog({ open, onOpenChange, onOpeningUpdated, openin
               Make changes to your opening. Click save when you're done.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-title">Opening Title</Label>
-              <Input
-                id="edit-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., Building the next big thing"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-project-idea">Project Idea</Label>
-              <Textarea
-                id="edit-project-idea"
-                value={projectIdea}
-                onChange={(e) => setProjectIdea(e.target.value)}
-                placeholder="Describe your vision for the project..."
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
+             <div className="space-y-2">
+                <Label htmlFor="edit-hackathonName">Hackathon Name</Label>
+                <Input id="edit-hackathonName" value={data.hackathonName || ''} onChange={(e) => handleDataChange('hackathonName', e.target.value)} placeholder="e.g., Hack The Planet 2024" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="edit-location">Location</Label>
-                    <Input id="edit-location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g., Remote or City, State"/>
+                    <Label htmlFor="edit-location">Venue / Location</Label>
+                    <Input id="edit-location" value={data.location || ''} onChange={(e) => handleDataChange('location', e.target.value)} placeholder="e.g., Remote or City, State"/>
                 </div>
+                <div className="space-y-2">
+                    <Label htmlFor="edit-hackathonLink">Hackathon Website (Optional)</Label>
+                    <div className="flex items-center gap-2">
+                        <LinkIcon className="h-5 w-5 text-muted-foreground" />
+                        <Input id="edit-hackathonLink" value={data.hackathonLink || ''} onChange={(e) => handleDataChange('hackathonLink', e.target.value)} placeholder="https://example.com"/>
+                    </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div className="space-y-2">
                     <Label htmlFor="edit-deadline">Application Deadline</Label>
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
                             variant={"outline"}
-                            className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !deadline && "text-muted-foreground"
-                            )}
+                            className={cn( "w-full justify-start text-left font-normal", !data.deadline && "text-muted-foreground" )}
                             >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {deadline ? format(deadline, "PPP") : <span>Pick a date</span>}
+                            {data.deadline ? format(data.deadline, "PPP") : <span>Pick a date</span>}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
-                            <Calendar
-                            mode="single"
-                            selected={deadline}
-                            onSelect={setDeadline}
-                            initialFocus
-                            />
+                            <Calendar mode="single" selected={data.deadline} onSelect={(d) => handleDataChange('deadline', d)} initialFocus />
                         </PopoverContent>
                     </Popover>
                 </div>
@@ -161,46 +151,47 @@ export function EditOpeningDialog({ open, onOpenChange, onOpeningUpdated, openin
                         <PopoverTrigger asChild>
                             <Button
                             variant={"outline"}
-                            className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !hackathonEndDate && "text-muted-foreground"
-                            )}
+                            className={cn( "w-full justify-start text-left font-normal", !data.hackathonEndDate && "text-muted-foreground" )}
                             >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {hackathonEndDate ? format(hackathonEndDate, "PPP") : <span>Pick a date</span>}
+                            {data.hackathonEndDate ? format(data.hackathonEndDate, "PPP") : <span>Pick a date</span>}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
-                            <Calendar
-                            mode="single"
-                            selected={hackathonEndDate}
-                            onSelect={setHackathonEndDate}
-                            initialFocus
-                            />
+                            <Calendar mode="single" selected={data.hackathonEndDate} onSelect={(d) => handleDataChange('hackathonEndDate', d)} initialFocus />
                         </PopoverContent>
                     </Popover>
                 </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-required-roles">Required Roles</Label>
-              <Input
-                id="edit-required-roles"
-                value={requiredRoles}
-                onChange={(e) => setRequiredRoles(e.target.value)}
-                placeholder="e.g., Frontend Dev, UI/UX Designer"
-              />
-               <p className="text-xs text-muted-foreground">Separate roles with commas.</p>
-            </div>
              <div className="space-y-2">
-              <Label htmlFor="edit-tech-stack">Tech Stack</Label>
-              <Input
-                id="edit-tech-stack"
-                value={techStack}
-                onChange={(e) => setTechStack(e.target.value)}
-                placeholder="e.g., React, Next.js, Firebase"
-              />
-              <p className="text-xs text-muted-foreground">Separate technologies with commas.</p>
-            </div>
+                    <Label htmlFor="edit-problem-statement">Problem Statement (Optional)</Label>
+                    <Textarea
+                        id="edit-problem-statement"
+                        value={data.problemStatement || ''}
+                        onChange={(e) => handleDataChange('problemStatement', e.target.value)}
+                        placeholder="Describe your vision for the project, the problem you're solving, etc."
+                    />
+                </div>
+                <div className="space-y-2">
+                <Label htmlFor="edit-required-roles">Required Roles</Label>
+                <Input
+                    id="edit-required-roles"
+                    value={data.requiredRoles as string || ''}
+                    onChange={(e) => handleDataChange('requiredRoles', e.target.value)}
+                    placeholder="e.g., Frontend Dev, UI/UX Designer"
+                />
+                <p className="text-xs text-muted-foreground">Separate roles with commas.</p>
+                </div>
+                <div className="space-y-2">
+                <Label htmlFor="edit-tech-stack">Tech Stack Required</Label>
+                <Input
+                    id="edit-tech-stack"
+                    value={data.techStack as string || ''}
+                    onChange={(e) => handleDataChange('techStack', e.target.value)}
+                    placeholder="e.g., React, Next.js, Firebase"
+                />
+                <p className="text-xs text-muted-foreground">Separate technologies with commas.</p>
+                </div>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading}>

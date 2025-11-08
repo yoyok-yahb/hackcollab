@@ -8,6 +8,8 @@ import { Button } from './ui/button';
 import { Heart, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from './ui/toast';
+import Link from 'next/link';
 
 export function DiscoverCardStack({ users }: { users: User[] }) {
   const [stack, setStack] = useState(users);
@@ -20,19 +22,21 @@ export function DiscoverCardStack({ users }: { users: User[] }) {
     setIsAnimating(true);
 
     if (liked) {
-      // In a real app, this might be more complex, e.g. matching for a specific opening
-      // For now, we'll just pick the first team opening as an example
       const teamOpening = teamOpenings[0];
-
-      addMatch({
+      const newMatch = addMatch({
         userId1: currentUser.id,
         userId2: likedUser.id,
         teamOpeningId: teamOpening.id,
       });
 
       toast({
-        title: 'New Match!',
-        description: `You matched with ${likedUser.name} for "${teamOpening.title}"`,
+        title: "It's a match!",
+        description: `You and ${likedUser.name} are matched for "${teamOpening.title}".`,
+        action: (
+          <ToastAction asChild altText="Message">
+            <Link href={`/messages/conv-${newMatch.id}`}>Message</Link>
+          </ToastAction>
+        ),
       });
     }
 

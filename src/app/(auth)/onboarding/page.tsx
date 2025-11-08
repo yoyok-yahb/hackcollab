@@ -40,7 +40,8 @@ const getInitialData = (): Partial<User> => {
         experience: '',
         preferences: [],
         socialLinks: { github: '', linkedin: '', twitter: '' },
-        image: { id: 'user1', imageUrl: 'https://picsum.photos/seed/1/200/200', imageHint: 'person portrait', description: '' }
+        image: { id: 'user1', imageUrl: 'https://picsum.photos/seed/1/200/200', imageHint: 'person portrait', description: '' },
+        projects: []
     };
 };
 

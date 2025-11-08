@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser } from '@/lib/data';
-import { Github, Linkedin, Pencil, Twitter, Briefcase, Award, Lightbulb } from 'lucide-react';
+import { Github, Linkedin, Pencil, Twitter, Briefcase, Award, Lightbulb, Link as LinkIcon, Heart } from 'lucide-react';
 import { ProfileVerification } from '@/components/profile-verification';
 import Link from 'next/link';
 import { useIsClient } from '@/hooks/use-is-client';
@@ -91,8 +91,7 @@ export default function ProfilePage() {
                         <CardTitle className="flex items-center gap-2"><Award className="h-6 w-6 text-primary" /> Hackathon Experience</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">{user.experience || "No hackathon experience listed yet."}</p>
-
+                        <p className="text-muted-foreground whitespace-pre-wrap">{user.experience || "No hackathon experience listed yet."}</p>
                     </CardContent>
                 </Card>
 
@@ -101,7 +100,24 @@ export default function ProfilePage() {
                        <CardTitle className="flex items-center gap-2"><Briefcase className="h-6 w-6 text-primary" /> Past Projects</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">No projects listed yet. Add some from the edit profile page!</p>
+                        {user.projects && user.projects.length > 0 ? (
+                            <div className="space-y-4">
+                                {user.projects.map((project, index) => (
+                                    <div key={index} className="border-b pb-4 last:border-b-0 last:pb-0">
+                                        <h4 className="font-semibold">{project.title}</h4>
+                                        <p className="text-sm text-muted-foreground mt-1 mb-2">{project.description}</p>
+                                        {project.link && (
+                                            <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1">
+                                                <LinkIcon className="h-4 w-4" />
+                                                View Project
+                                            </a>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-muted-foreground">No projects listed yet. Add some from the edit profile page!</p>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -109,7 +125,7 @@ export default function ProfilePage() {
             <div className="space-y-6">
                 <Card>
                      <CardHeader>
-                        <CardTitle>Interests & Hobbies</CardTitle>
+                        <CardTitle  className="flex items-center gap-2"><Heart className="h-6 w-6 text-primary" /> Interests & Hobbies</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {user.preferences && user.preferences.length > 0 ? (

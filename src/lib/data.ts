@@ -1,6 +1,12 @@
 import type { ImagePlaceholder } from './placeholder-images';
 import { PlaceHolderImages } from './placeholder-images';
 
+export interface Project {
+  title: string;
+  description: string;
+  link?: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -16,6 +22,7 @@ export interface User {
   };
   image: ImagePlaceholder;
   email?: string;
+  projects: Project[];
 }
 
 export interface TeamOpening {
@@ -62,6 +69,7 @@ export const users: User[] = [
       linkedin: 'https://linkedin.com/in/alice',
     },
     image: getUserImage('user1'),
+    projects: [{ title: 'E-commerce Platform', description: 'Built a full-stack e-commerce site.', link: 'https://github.com/alice/ecom'}]
   },
   {
     id: 'user2',
@@ -75,6 +83,7 @@ export const users: User[] = [
       linkedin: 'https://linkedin.com/in/bob',
     },
     image: getUserImage('user2'),
+    projects: []
   },
   {
     id: 'user3',
@@ -88,6 +97,7 @@ export const users: User[] = [
       github: 'https://github.com/charlie',
     },
     image: getUserImage('user3'),
+    projects: []
   },
   {
     id: 'user4',
@@ -102,6 +112,7 @@ export const users: User[] = [
       twitter: 'https://twitter.com/diana'
     },
     image: getUserImage('user4'),
+    projects: []
   },
   {
     id: 'user5',
@@ -115,6 +126,7 @@ export const users: User[] = [
         github: 'https://github.com/ethan'
     },
     image: getUserImage('user5'),
+    projects: []
   },
    {
     id: 'user6',
@@ -129,6 +141,7 @@ export const users: User[] = [
       linkedin: 'https://linkedin.com/in/fiona',
     },
     image: getUserImage('user6'),
+    projects: []
   },
   {
     id: 'user7',
@@ -143,11 +156,24 @@ export const users: User[] = [
         twitter: 'https://twitter.com/george'
     },
     image: getUserImage('user7'),
+    projects: []
   }
 ];
 
 // Default user data, can be customized
-const defaultUser = { ...users[0] };
+const defaultUser: User = {
+    id: `user${Date.now()}`,
+    name: '',
+    age: 18,
+    bio: '',
+    email: '',
+    skills: [],
+    experience: '',
+    preferences: [],
+    socialLinks: { github: '', linkedin: '', twitter: '' },
+    image: getUserImage('user1'),
+    projects: []
+};
 
 // Function to save user data to local storage
 export const saveCurrentUser = (user: User) => {
@@ -167,6 +193,10 @@ export const getCurrentUser = (): User => {
             // Ensure image is correctly loaded if it's just an id
             if (typeof parsedUser.image === 'string') {
                 parsedUser.image = getUserImage(parsedUser.image);
+            }
+             // Ensure projects array exists
+            if (!parsedUser.projects) {
+                parsedUser.projects = [];
             }
             return parsedUser;
         }

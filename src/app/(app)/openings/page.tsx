@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -97,9 +98,8 @@ export default function OpeningsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
             {filteredOpenings.map((opening) => {
                 const author = users.find(u => u.id === opening.authorId);
-                // Ensure deadline is a Date object
-                const deadlineDate = typeof opening.deadline === 'string' ? parseISO(opening.deadline) : opening.deadline;
-                const createdAtDate = typeof opening.createdAt === 'string' ? parseISO(opening.createdAt) : opening.createdAt;
+                const deadlineDate = opening.deadline;
+                const createdAtDate = opening.createdAt;
                 return (
             <Card key={opening.id} className="flex flex-col">
                 <CardHeader>

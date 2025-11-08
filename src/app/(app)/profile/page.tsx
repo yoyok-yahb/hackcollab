@@ -9,9 +9,27 @@ import { Github, Linkedin, Pencil, Twitter, Briefcase, Award, Lightbulb, Link as
 import Link from 'next/link';
 import { useIsClient } from '@/hooks/use-is-client';
 import { Icons } from '@/components/icons';
+import { useEffect, useState } from 'react';
 
 export default function ProfilePage() {
   const isClient = useIsClient();
+  // Force re-render when user data changes
+  const [user, setUser] = useState(getCurrentUser());
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUser(getCurrentUser());
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    // Also update when the component mounts, in case data changed while the component was unmounted
+    setUser(getCurrentUser()); 
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, []);
+
 
   if (!isClient) {
      return (
@@ -21,8 +39,6 @@ export default function ProfilePage() {
         </div>
     )
   }
-
-  const user = getCurrentUser();
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -123,3 +139,5 @@ export default function ProfilePage() {
         </div>
     </div>
   );
+
+    

@@ -52,6 +52,7 @@ export interface TeamOpening {
   createdAt: Date;
   approvedMembers: string[];
   tasks: Task[];
+  title?: string;
 }
 
 export interface Match {
@@ -204,21 +205,22 @@ const defaultUser: User = {
 export const saveCurrentUser = (user: User) => {
   if (typeof window !== 'undefined') {
     const userToSave = { ...user };
-    const oldUserData = getCurrentUser(); // Get the state of user data before the change
-
-    // Prevent storing large base64 strings in localStorage by assigning a new placeholder
-    const imageChanged = oldUserData.image?.imageUrl !== userToSave.image?.imageUrl;
-
-    if (imageChanged && userToSave.image?.imageUrl?.startsWith('data:image')) {
-      const userImages = PlaceHolderImages.filter(p => p.imageHint.includes('person') || p.imageHint.includes('portrait'));
-      const existingImageIndex = userImages.findIndex(img => img.imageUrl === oldUserData.image.imageUrl);
-      
-      let newImageIndex;
-      do {
-        newImageIndex = Math.floor(Math.random() * userImages.length);
-      } while (newImageIndex === existingImageIndex && userImages.length > 1); // Ensure new image is different if possible
-
-      userToSave.image = userImages[newImageIndex] || getUserImage('user1');
+    
+    // Check if the image is a large base64 string. If so, don't save it to avoid quota errors.
+    // In a real app, you would upload this to a storage service and save the URL.
+    if (userToSave.image.imageUrl && userToSave.image.imageUrl.startsWith('data:image') && userToSave.image.imageUrl.length > 1024 * 100) { // 100KB limit
+        // Get the previous user data to revert the image if needed, or assign a new placeholder
+        try {
+            const oldUserRaw = localStorage.getItem('currentUser');
+            if(oldUserRaw){
+                const oldUserData = JSON.parse(oldUserRaw);
+                userToSave.image = oldUserData.image || getUserImage('user1');
+            } else {
+                 userToSave.image = getUserImage('user1');
+            }
+        } catch (e) {
+            userToSave.image = getUserImage('user1');
+        }
     }
 
     localStorage.setItem('currentUser', JSON.stringify(userToSave));
@@ -286,6 +288,7 @@ let teamOpenings: TeamOpening[] = [
     createdAt: new Date('2024-07-20T10:00:00Z'),
     approvedMembers: [],
     tasks: [],
+    title: 'AI Finance Hack'
   },
   {
     id: 'opening2',
@@ -300,6 +303,7 @@ let teamOpenings: TeamOpening[] = [
     createdAt: new Date('2024-07-19T14:30:00Z'),
     approvedMembers: [],
     tasks: [],
+    title: 'NYC Connect'
   },
   {
     id: 'opening3',
@@ -314,6 +318,7 @@ let teamOpenings: TeamOpening[] = [
     createdAt: new Date('2024-07-21T09:00:00Z'),
     approvedMembers: ['user1'],
     tasks: [],
+    title: 'Language Gamify'
   },
 ];
 
@@ -649,3 +654,4 @@ export const updateTask = (updatedTask: Task): Task => {
     return updatedTask;
 }
 
+    

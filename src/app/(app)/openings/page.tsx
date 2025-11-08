@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function OpeningsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -70,6 +70,79 @@ export default function OpeningsPage() {
     );
   });
 
+  const yourOpenings = filteredOpenings.filter(o => o.authorId === currentUser.id);
+  const otherOpenings = filteredOpenings.filter(o => o.authorId !== currentUser.id);
+
+  const renderOpeningCard = (opening: TeamOpening) => {
+    const author = users.find(u => u.id === opening.authorId);
+    const deadlineDate = new Date(opening.deadline);
+    const createdAtDate = new Date(opening.createdAt);
+    const approvedMembers = opening.approvedMembers?.map(id => getUserById(id)).filter(Boolean) as any[];
+
+    return (
+        <Card key={opening.id} className="flex flex-col">
+            <CardHeader>
+            <CardTitle>{opening.title}</CardTitle>
+            <CardDescription>
+                Posted by {author?.name} • {formatDistanceToNow(createdAtDate, { addSuffix: true })}
+            </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow space-y-4">
+                <p className="text-sm text-muted-foreground">{opening.projectIdea}</p>
+                
+                <div className="flex items-center text-sm text-muted-foreground">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    <span>{opening.location}</span>
+                </div>
+
+                <div className="flex items-center text-sm text-muted-foreground">
+                    <CalendarClock className="mr-2 h-4 w-4" />
+                    <span>Apply by {format(deadlineDate, 'PPP')}</span>
+                </div>
+
+                <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Required Roles:</h4>
+                    <div className="flex flex-wrap gap-2">
+                        {opening.requiredRoles.map(role => (
+                            <Badge key={role} variant="secondary">{role}</Badge>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <h4 className="font-semibold text-sm">Tech Stack:</h4>
+                    <div className="flex flex-wrap gap-2">
+                        {opening.techStack.map(tech => (
+                            <Badge key={tech} variant="outline">{tech}</Badge>
+                        ))}
+                    </div>
+                </div>
+
+                {approvedMembers && approvedMembers.length > 0 && (
+                   <div className="space-y-2">
+                        <h4 className="font-semibold text-sm flex items-center"><UsersIcon className="mr-2 h-4 w-4"/> Team Members:</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {approvedMembers.map(member => (
+                                <Badge key={member.id} variant="default">{member.name}</Badge>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+            </CardContent>
+            <CardFooter>
+            <Button 
+                className="w-full"
+                onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
+                disabled={new Date() > deadlineDate}
+            >
+                {new Date() > deadlineDate ? 'Deadline Passed' : 'Express Interest'}
+            </Button>
+            </CardFooter>
+        </Card>
+    )
+  }
+
   return (
     <div className="container mx-auto p-4 md:p-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
@@ -97,86 +170,45 @@ export default function OpeningsPage() {
           </CreateOpeningDialog>
         </div>
       </div>
-
-      {filteredOpenings.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-            {filteredOpenings.map((opening) => {
-                const author = users.find(u => u.id === opening.authorId);
-                const deadlineDate = new Date(opening.deadline);
-                const createdAtDate = new Date(opening.createdAt);
-                const approvedMembers = opening.approvedMembers?.map(id => getUserById(id)).filter(Boolean) as any[];
-
-                return (
-            <Card key={opening.id} className="flex flex-col">
-                <CardHeader>
-                <CardTitle>{opening.title}</CardTitle>
-                <CardDescription>
-                    Posted by {author?.name} • {formatDistanceToNow(createdAtDate, { addSuffix: true })}
-                </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow space-y-4">
-                    <p className="text-sm text-muted-foreground">{opening.projectIdea}</p>
-                    
-                    <div className="flex items-center text-sm text-muted-foreground">
-                        <MapPin className="mr-2 h-4 w-4" />
-                        <span>{opening.location}</span>
+      
+      <Accordion type="multiple" defaultValue={['your-openings', 'other-openings']} className="w-full space-y-6">
+        <AccordionItem value="your-openings">
+            <AccordionTrigger className="text-xl font-semibold">Your Openings</AccordionTrigger>
+            <AccordionContent>
+                {yourOpenings.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+                        {yourOpenings.map(renderOpeningCard)}
                     </div>
-
-                    <div className="flex items-center text-sm text-muted-foreground">
-                        <CalendarClock className="mr-2 h-4 w-4" />
-                        <span>Apply by {format(deadlineDate, 'PPP')}</span>
+                ) : (
+                    <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-10 text-center">
+                        <h3 className="text-lg font-semibold">You haven't posted any openings.</h3>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Click "Post Opening" to find your team.
+                        </p>
                     </div>
+                )}
+            </AccordionContent>
+        </AccordionItem>
 
-                    <div className="space-y-2">
-                        <h4 className="font-semibold text-sm">Required Roles:</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {opening.requiredRoles.map(role => (
-                                <Badge key={role} variant="secondary">{role}</Badge>
-                            ))}
-                        </div>
+        <AccordionItem value="other-openings">
+            <AccordionTrigger className="text-xl font-semibold">Openings For You</AccordionTrigger>
+            <AccordionContent>
+                 {otherOpenings.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+                        {otherOpenings.map(renderOpeningCard)}
                     </div>
-
-                    <div className="space-y-2">
-                        <h4 className="font-semibold text-sm">Tech Stack:</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {opening.techStack.map(tech => (
-                                <Badge key={tech} variant="outline">{tech}</Badge>
-                            ))}
-                        </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-10 text-center">
+                        <h3 className="text-lg font-semibold">No other openings found.</h3>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Check back later or try adjusting your search terms.
+                        </p>
                     </div>
+                  )}
+            </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
-                    {approvedMembers && approvedMembers.length > 0 && (
-                       <div className="space-y-2">
-                            <h4 className="font-semibold text-sm flex items-center"><UsersIcon className="mr-2 h-4 w-4"/> Team Members:</h4>
-                            <div className="flex flex-wrap gap-2">
-                                {approvedMembers.map(member => (
-                                    <Badge key={member.id} variant="default">{member.name}</Badge>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                </CardContent>
-                <CardFooter>
-                <Button 
-                    className="w-full"
-                    onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
-                    disabled={new Date() > deadlineDate}
-                >
-                    {new Date() > deadlineDate ? 'Deadline Passed' : 'Express Interest'}
-                </Button>
-                </CardFooter>
-            </Card>
-            )})}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-20 text-center">
-            <h3 className="text-xl font-semibold">No openings found</h3>
-            <p className="mt-2 text-muted-foreground">
-                Try adjusting your search terms or post a new opening!
-            </p>
-        </div>
-      )}
     </div>
   );
 }

@@ -17,9 +17,22 @@ const steps = [
     { component: OnboardingStep5, title: "Interests & Hobbies" },
 ];
 
+const getInitialData = (): Partial<User> => {
+    const user = getCurrentUser();
+    return {
+        ...user,
+        name: user.name || '',
+        email: user.email || '',
+        skills: user.skills || [],
+        experience: user.experience || '',
+        preferences: user.preferences || [],
+        socialLinks: user.socialLinks || { github: '', linkedin: '', twitter: '' },
+    };
+};
+
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [onboardingData, setOnboardingData] = useState<Partial<User>>(() => getCurrentUser());
+  const [onboardingData, setOnboardingData] = useState<Partial<User>>(getInitialData);
   const router = useRouter();
 
   const updateOnboardingData = (data: Partial<User>) => {

@@ -259,7 +259,7 @@ export default function OpeningsPage() {
         </div>
       </div>
       
-      <Accordion type="multiple" defaultValue={['your-openings', 'other-openings']} className="w-full space-y-6">
+      <Accordion type="multiple" defaultValue={['other-openings']} className="w-full space-y-6">
         <AccordionItem value="your-openings">
             <AccordionTrigger className="text-xl font-semibold">Your Openings</AccordionTrigger>
             <AccordionContent>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getCurrentUser, getConversations, User, Message, addMessage, getMessagesForConversation, getUserById, getTeamOpenings, TeamOpening } from '@/lib/data';
-import { ArrowLeft, Loader2, Send, ShieldAlert, Sparkles, Users, Info } from 'lucide-react';
+import { ArrowLeft, Loader2, Send, ShieldAlert, Sparkles, Users, Info, ListTodo } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -166,12 +166,20 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
           <p className="text-xs text-muted-foreground">{getParticipantCount()}</p>
         </div>
          {isGroupChat && (
-            <Button asChild variant="ghost" size="icon">
-                <Link href={`/messages/${params.id}/details`}>
-                    <Info className="h-5 w-5" />
-                    <span className="sr-only">Group Details</span>
-                </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+                <Button asChild variant="ghost" size="icon">
+                    <Link href={`/messages/${params.id}/tasks`}>
+                        <ListTodo className="h-5 w-5" />
+                        <span className="sr-only">Tasks</span>
+                    </Link>
+                </Button>
+                <Button asChild variant="ghost" size="icon">
+                    <Link href={`/messages/${params.id}/details`}>
+                        <Info className="h-5 w-5" />
+                        <span className="sr-only">Group Details</span>
+                    </Link>
+                </Button>
+            </div>
         )}
       </header>
       <ScrollArea className="flex-1 p-4">

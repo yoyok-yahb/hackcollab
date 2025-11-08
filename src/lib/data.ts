@@ -1,5 +1,4 @@
 
-
 import type { ImagePlaceholder } from './placeholder-images';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -26,6 +25,19 @@ export interface User {
   projects: Project[];
 }
 
+export type TaskStatus = 'Not Started Yet' | 'Ongoing' | 'Completed';
+
+export interface Task {
+  id: string;
+  openingId: string;
+  description: string;
+  status: TaskStatus;
+  assignedTo?: string;
+  deadline?: Date;
+  createdAt: Date;
+}
+
+
 export interface TeamOpening {
   id: string;
   title: string;
@@ -37,6 +49,7 @@ export interface TeamOpening {
   deadline: Date;
   createdAt: Date;
   approvedMembers: string[];
+  tasks: Task[];
 }
 
 export interface Match {
@@ -231,7 +244,7 @@ export const getCurrentUser = (): User => {
 // Function to get a user by their ID
 export const getUserById = (id: string) => {
     if (id === 'system') {
-      return { id: 'system', name: 'System', image: { imageUrl: '', imageHint: '', id: '', description: '' } };
+      return { id: 'system', name: 'System', image: { imageUrl: '', imageHint: '', id: '', description: '' }, age: 0, bio: '', skills: [], experience: '', socialLinks: {}, projects: [] };
     }
     if (id === getCurrentUser().id) {
         return getCurrentUser();
@@ -252,6 +265,7 @@ let teamOpenings: TeamOpening[] = [
     deadline: new Date('2024-08-15T23:59:59Z'),
     createdAt: new Date('2024-07-20T10:00:00Z'),
     approvedMembers: [],
+    tasks: [],
   },
   {
     id: 'opening2',
@@ -264,6 +278,7 @@ let teamOpenings: TeamOpening[] = [
     deadline: new Date('2024-08-01T23:59:59Z'),
     createdAt: new Date('2024-07-19T14:30:00Z'),
     approvedMembers: [],
+    tasks: [],
   },
   {
     id: 'opening3',
@@ -276,6 +291,7 @@ let teamOpenings: TeamOpening[] = [
     deadline: new Date('2024-09-01T23:59:59Z'),
     createdAt: new Date('2024-07-21T09:00:00Z'),
     approvedMembers: ['user1'],
+    tasks: [],
   },
 ];
 
@@ -285,6 +301,7 @@ const parseOpeningDates = (openings: any[]): TeamOpening[] => {
         createdAt: new Date(o.createdAt),
         deadline: new Date(o.deadline),
         approvedMembers: o.approvedMembers || [],
+        tasks: (o.tasks || []).map((t: any) => ({ ...t, createdAt: new Date(t.createdAt), deadline: t.deadline ? new Date(t.deadline) : undefined })),
     }));
 }
 
@@ -313,13 +330,14 @@ const saveTeamOpenings = (openings: TeamOpening[]) => {
    }
 }
 
-export const addTeamOpening = (opening: Omit<TeamOpening, 'id' | 'createdAt' | 'approvedMembers'>) => {
+export const addTeamOpening = (opening: Omit<TeamOpening, 'id' | 'createdAt' | 'approvedMembers' | 'tasks'>) => {
     let currentOpenings = getTeamOpenings();
     const newOpening: TeamOpening = {
       ...opening,
       id: `opening${Date.now()}`,
       createdAt: new Date(),
       approvedMembers: [],
+      tasks: [],
     };
     currentOpenings = [newOpening, ...currentOpenings];
     saveTeamOpenings(currentOpenings);
@@ -521,4 +539,46 @@ export const getGroupConversations = () => {
         };
     })
     .sort((a,b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime());
+}
+
+
+export const getTasksForOpening = (openingId: string): Task[] => {
+    const openings = getTeamOpenings();
+    const opening = openings.find(o => o.id === openingId);
+    return opening?.tasks.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()) || [];
+}
+
+export const addTask = (taskData: Omit<Task, 'id' | 'createdAt'>): Task => {
+    const openings = getTeamOpenings();
+    const openingIndex = openings.findIndex(o => o.id === taskData.openingId);
+    if (openingIndex === -1) {
+        throw new Error('Opening not found');
+    }
+
+    const newTask: Task = {
+        ...taskData,
+        id: `task-${Date.now()}`,
+        createdAt: new Date(),
+    };
+    
+    openings[openingIndex].tasks.push(newTask);
+    saveTeamOpenings(openings);
+    return newTask;
+}
+
+export const updateTask = (updatedTask: Task): Task => {
+    const openings = getTeamOpenings();
+    const openingIndex = openings.findIndex(o => o.id === updatedTask.openingId);
+    if (openingIndex === -1) {
+        throw new Error('Opening not found');
+    }
+
+    const taskIndex = openings[openingIndex].tasks.findIndex(t => t.id === updatedTask.id);
+    if (taskIndex === -1) {
+        throw new Error('Task not found');
+    }
+    
+    openings[openingIndex].tasks[taskIndex] = updatedTask;
+    saveTeamOpenings(openings);
+    return updatedTask;
 }

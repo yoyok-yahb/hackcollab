@@ -1,4 +1,5 @@
 
+
 import type { ImagePlaceholder } from './placeholder-images';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -47,6 +48,7 @@ export interface TeamOpening {
   techStack: string[];
   location: string;
   deadline: Date;
+  hackathonEndDate: Date;
   createdAt: Date;
   approvedMembers: string[];
   tasks: Task[];
@@ -263,6 +265,7 @@ let teamOpenings: TeamOpening[] = [
     techStack: ['React Native', 'Python', 'TensorFlow', 'Figma'],
     location: 'Remote',
     deadline: new Date('2024-08-15T23:59:59Z'),
+    hackathonEndDate: new Date('2024-08-18T17:00:00Z'),
     createdAt: new Date('2024-07-20T10:00:00Z'),
     approvedMembers: [],
     tasks: [],
@@ -276,6 +279,7 @@ let teamOpenings: TeamOpening[] = [
     techStack: ['Next.js', 'Firebase', 'Swift', 'Kotlin'],
     location: 'New York, NY',
     deadline: new Date('2024-08-01T23:59:59Z'),
+    hackathonEndDate: new Date('2024-08-04T17:00:00Z'),
     createdAt: new Date('2024-07-19T14:30:00Z'),
     approvedMembers: [],
     tasks: [],
@@ -289,6 +293,7 @@ let teamOpenings: TeamOpening[] = [
     techStack: ['Node.js', 'PostgreSQL', 'Python', 'React'],
     location: 'San Francisco, CA',
     deadline: new Date('2024-09-01T23:59:59Z'),
+    hackathonEndDate: new Date('2024-09-04T17:00:00Z'),
     createdAt: new Date('2024-07-21T09:00:00Z'),
     approvedMembers: ['user1'],
     tasks: [],
@@ -300,6 +305,7 @@ const parseOpeningDates = (openings: any[]): TeamOpening[] => {
         ...o,
         createdAt: new Date(o.createdAt),
         deadline: new Date(o.deadline),
+        hackathonEndDate: new Date(o.hackathonEndDate),
         approvedMembers: o.approvedMembers || [],
         tasks: (o.tasks || []).map((t: any) => ({ ...t, createdAt: new Date(t.createdAt), deadline: t.deadline ? new Date(t.deadline) : undefined })),
     }));

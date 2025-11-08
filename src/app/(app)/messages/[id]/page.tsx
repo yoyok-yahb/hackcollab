@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, use, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { generateIcebreaker } from '@/ai/flows/icebreaker-tool';
 import { moderateContent } from '@/ai/flows/content-moderation-flow';
+import { HackathonCountdown } from '@/components/hackathon-countdown';
 
 
 export default function ChatPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
@@ -29,15 +31,16 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
   let chatParticipants: User[] = [];
   let chatTitle: string = '';
   let chatImage: string | null = null;
+  let openingDetails: TeamOpening | undefined;
 
   if (isGroupChat) {
     const openingId = params.id.replace('conv-group-', '');
-    const opening = allOpenings.find(o => o.id === openingId);
-    if (opening) {
-        currentConversation = opening;
-        chatTitle = opening.title;
-        const author = getUserById(opening.authorId);
-        const members = opening.approvedMembers.map(id => getUserById(id)).filter(Boolean) as User[];
+    openingDetails = allOpenings.find(o => o.id === openingId);
+    if (openingDetails) {
+        currentConversation = openingDetails;
+        chatTitle = openingDetails.title;
+        const author = getUserById(openingDetails.authorId);
+        const members = openingDetails.approvedMembers.map(id => getUserById(id)).filter(Boolean) as User[];
         if (author) {
             chatParticipants = [author, ...members];
         }
@@ -145,7 +148,7 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
 
   return (
     <div className="flex flex-col h-full">
-      <header className="flex items-center gap-4 border-b bg-background p-3">
+      <header className="flex items-center gap-3 border-b bg-background p-3 flex-wrap">
         <Button asChild variant="ghost" size="icon" className="md:hidden">
             <Link href="/messages"><ArrowLeft className="h-6 w-6" /></Link>
         </Button>
@@ -166,20 +169,21 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
           <p className="text-xs text-muted-foreground">{getParticipantCount()}</p>
         </div>
          {isGroupChat && (
-            <div className="flex items-center gap-2">
-                <Button asChild variant="ghost" size="icon">
-                    <Link href={`/messages/${params.id}/tasks`}>
-                        <ListTodo className="h-5 w-5" />
-                        <span className="sr-only">Tasks</span>
-                    </Link>
-                </Button>
-                <Button asChild variant="ghost" size="icon">
-                    <Link href={`/messages/${params.id}/details`}>
-                        <Info className="h-5 w-5" />
-                        <span className="sr-only">Group Details</span>
-                    </Link>
-                </Button>
-            </div>
+          <div className="flex items-center gap-2">
+              {openingDetails && <HackathonCountdown endDate={openingDetails.hackathonEndDate} />}
+              <Button asChild variant="ghost" size="icon">
+                  <Link href={`/messages/${params.id}/tasks`}>
+                      <ListTodo className="h-5 w-5" />
+                      <span className="sr-only">Tasks</span>
+                  </Link>
+              </Button>
+              <Button asChild variant="ghost" size="icon">
+                  <Link href={`/messages/${params.id}/details`}>
+                      <Info className="h-5 w-5" />
+                      <span className="sr-only">Group Details</span>
+                  </Link>
+              </Button>
+          </div>
         )}
       </header>
       <ScrollArea className="flex-1 p-4">

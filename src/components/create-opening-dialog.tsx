@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, ReactNode } from 'react';
@@ -36,6 +37,7 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
   const [techStack, setTechStack] = useState('');
   const [location, setLocation] = useState('');
   const [deadline, setDeadline] = useState<Date>();
+  const [hackathonEndDate, setHackathonEndDate] = useState<Date>();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const currentUser = getCurrentUser();
@@ -47,15 +49,16 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
     setTechStack('');
     setLocation('');
     setDeadline(undefined);
+    setHackathonEndDate(undefined);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !projectIdea || !location || !deadline) {
+    if (!title || !projectIdea || !location || !deadline || !hackathonEndDate) {
       toast({
         variant: 'destructive',
         title: 'Missing Fields',
-        description: 'Please fill out all fields, including location and deadline.',
+        description: 'Please fill out all fields, including deadline and hackathon end date.',
       });
       return;
     }
@@ -70,6 +73,7 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
             techStack: techStack.split(',').map(s => s.trim()).filter(Boolean),
             location,
             deadline,
+            hackathonEndDate,
         });
         
         toast({
@@ -96,7 +100,7 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Post a New Opening</DialogTitle>
@@ -123,7 +127,7 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
                 placeholder="Describe your vision for the project..."
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
                     <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g., Remote or City, State"/>
@@ -148,6 +152,31 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
                             mode="single"
                             selected={deadline}
                             onSelect={setDeadline}
+                            initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="hackathon-end-date">Hackathon End Date</Label>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                            variant={"outline"}
+                            className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !hackathonEndDate && "text-muted-foreground"
+                            )}
+                            >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {hackathonEndDate ? format(hackathonEndDate, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                            mode="single"
+                            selected={hackathonEndDate}
+                            onSelect={setHackathonEndDate}
                             initialFocus
                             />
                         </PopoverContent>

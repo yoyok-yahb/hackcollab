@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Github, Linkedin, Twitter } from 'lucide-react';
 import type { User } from '@/lib/data';
+import { Textarea } from '../ui/textarea';
 
 interface OnboardingStepProps {
   onNext: () => void;
@@ -27,9 +28,13 @@ export function OnboardingStep1({ onNext, data, setData }: OnboardingStepProps) 
               <Input id="name" placeholder="Ada Lovelace" value={data.name || ''} onChange={(e) => setData({ ...data, name: e.target.value })}/>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" placeholder="ada@example.com" value={data.email || ''} onChange={(e) => setData({ ...data, email: e.target.value })}/>
+              <Label htmlFor="age">Age</Label>
+              <Input id="age" type="number" placeholder="28" value={data.age || ''} onChange={(e) => setData({ ...data, age: Number(e.target.value) })}/>
             </div>
+        </div>
+         <div className="space-y-2">
+            <Label htmlFor="bio">Your Bio</Label>
+            <Textarea id="bio" placeholder="Tell us a little bit about yourself..." value={data.bio || ''} onChange={(e) => setData({ ...data, bio: e.target.value })} />
         </div>
         <div className="space-y-2">
             <Label>Profile Photo</Label>

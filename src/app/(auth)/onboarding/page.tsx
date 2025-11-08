@@ -18,25 +18,40 @@ const steps = [
 ];
 
 const getInitialData = (): Partial<User> => {
-    const user = getCurrentUser();
+    try {
+        // This function runs on the client, so window is available
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            return JSON.parse(savedUser);
+        }
+    } catch (error) {
+        // In case of any error (e.g. storage disabled), fall back to default
+        console.error("Could not read from localStorage", error);
+    }
+    
+    // Return a default structure if nothing is in storage
     return {
-        ...user,
-        name: user.name || '',
-        email: user.email || '',
-        skills: user.skills || [],
-        experience: user.experience || '',
-        preferences: user.preferences || [],
-        socialLinks: user.socialLinks || { github: '', linkedin: '', twitter: '' },
+        id: `user${Date.now()}`,
+        name: '',
+        age: 18,
+        bio: '',
+        email: '',
+        skills: [],
+        experience: '',
+        preferences: [],
+        socialLinks: { github: '', linkedin: '', twitter: '' },
+        image: { id: 'user1', imageUrl: 'https://picsum.photos/seed/1/200/200', imageHint: 'person portrait', description: '' }
     };
 };
+
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState<Partial<User>>(getInitialData);
   const router = useRouter();
 
-  const updateOnboardingData = (data: Partial<User>) => {
-    setOnboardingData(prev => ({...prev, ...data}));
+  const updateOnboardingData = (newData: Partial<User>) => {
+    setOnboardingData(prev => ({...prev, ...newData}));
   };
 
   const handleNext = () => {

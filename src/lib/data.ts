@@ -208,8 +208,16 @@ export const saveCurrentUser = (user: User) => {
     // Prevent storing large base64 strings in localStorage
     if (userToSave.image?.imageUrl?.startsWith('data:image')) {
       // In a real app, you would upload this to a storage service and get a URL.
-      // For this mock app, we'll revert to a placeholder to avoid quota errors.
-      userToSave.image = getUserImage(userToSave.id) || getUserImage('user1');
+      // For this mock app, we'll assign a new random placeholder to show a change
+      // without exceeding localStorage quota.
+      const userImages = PlaceHolderImages.filter(p => p.imageHint.includes('person') || p.imageHint.includes('portrait'));
+      const existingImageIndex = userImages.findIndex(img => img.imageUrl === userToSave.image.imageUrl);
+      let newImageIndex = Math.floor(Math.random() * userImages.length);
+      // Ensure we get a different image
+      while (newImageIndex === existingImageIndex) {
+        newImageIndex = Math.floor(Math.random() * userImages.length);
+      }
+      userToSave.image = userImages[newImageIndex] || getUserImage('user1');
     }
 
     localStorage.setItem('currentUser', JSON.stringify(userToSave));
@@ -256,7 +264,7 @@ export const getUserById = (id: string) => {
     if (id === 'system') {
       return { id: 'system', name: 'System', image: { imageUrl: '', imageHint: '', id: '', description: '' }, age: 0, bio: '', skills: [], experience: '', socialLinks: {}, projects: [] };
     }
-    if (id === getCurrentUser().id) {
+    if (getCurrentUser().id === id) {
         return getCurrentUser();
     }
     return users.find(user => user.id === id);
@@ -321,7 +329,7 @@ const parseOpeningDates = (openings: any[]): TeamOpening[] => {
 
 export const getTeamOpenings = (): TeamOpening[] => {
     if (typeof window === 'undefined') {
-        return teamOpenings;
+        return parseOpeningDates(teamOpenings);
     }
     try {
         const savedOpenings = localStorage.getItem('teamOpenings');
@@ -329,11 +337,11 @@ export const getTeamOpenings = (): TeamOpening[] => {
             return parseOpeningDates(JSON.parse(savedOpenings));
         } else {
             localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
-            return teamOpenings;
+            return parseOpeningDates(teamOpenings);
         }
     } catch (e) {
         console.error("Failed to get team openings from localStorage", e);
-        return teamOpenings;
+        return parseOpeningDates(teamOpenings);
     }
 }
 

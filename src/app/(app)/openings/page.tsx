@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening, getUserById, deleteTeamOpening, removeMemberFromOpening } from '@/lib/data';
 import { format, formatDistanceToNow } from 'date-fns';
-import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Trash2, X } from 'lucide-react';
+import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Trash2, X, Sparkles, Loader2 } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
@@ -15,6 +15,8 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { findBestOpening } from '@/ai/flows/find-best-opening';
+import { cn } from '@/lib/utils';
 
 
 export default function OpeningsPage() {
@@ -22,6 +24,8 @@ export default function OpeningsPage() {
   const [openings, setOpenings] = useState<TeamOpening[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [tick, setTick] = useState(0);
+  const [recommendedOpeningId, setRecommendedOpeningId] = useState<string | null>(null);
+  const [isFinding, setIsFinding] = useState(false);
   const { toast } = useToast();
   const currentUser = getCurrentUser();
 
@@ -95,6 +99,31 @@ export default function OpeningsPage() {
 
   const yourOpenings = filteredOpenings.filter(o => o.authorId === currentUser.id);
   const otherOpenings = filteredOpenings.filter(o => o.authorId !== currentUser.id);
+  
+  const handleFindBestOpening = async () => {
+    setIsFinding(true);
+    setRecommendedOpeningId(null);
+    try {
+      const result = await findBestOpening({
+        userProfile: JSON.stringify(currentUser),
+        openings: JSON.stringify(otherOpenings),
+      });
+      setRecommendedOpeningId(result.bestOpeningId);
+      toast({
+        title: "AI Recommendation",
+        description: result.reasoning,
+      });
+    } catch (error) {
+      console.error("AI failed to find best opening", error);
+      toast({
+        variant: "destructive",
+        title: "AI Analysis Failed",
+        description: "Could not determine the best opening at this time.",
+      });
+    } finally {
+      setIsFinding(false);
+    }
+  };
 
   const renderOpeningCard = (opening: TeamOpening, isMyOpening: boolean) => {
     const author = users.find(u => u.id === opening.authorId);
@@ -103,7 +132,10 @@ export default function OpeningsPage() {
     const approvedMembers = opening.approvedMembers?.map(id => getUserById(id)).filter(Boolean) as any[];
 
     return (
-        <Card key={opening.id} className="flex flex-col">
+        <Card key={opening.id} className={cn("flex flex-col relative transition-shadow duration-300", recommendedOpeningId === opening.id && "shadow-lg ring-2 ring-primary")}>
+            {recommendedOpeningId === opening.id && (
+                <Badge className="absolute top-2 left-2 z-10" variant="default">Recommended</Badge>
+            )}
             <CardHeader>
             <CardTitle>{opening.title}</CardTitle>
             <CardDescription>
@@ -249,6 +281,12 @@ export default function OpeningsPage() {
         <AccordionItem value="other-openings">
             <AccordionTrigger className="text-xl font-semibold">Openings For You</AccordionTrigger>
             <AccordionContent>
+                <div className="flex justify-end mb-4">
+                    <Button onClick={handleFindBestOpening} disabled={isFinding}>
+                        {isFinding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4 text-primary-foreground" />}
+                        Find Best Opening
+                    </Button>
+                </div>
                  {otherOpenings.length > 0 ? (
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
                         {otherOpenings.map(opening => renderOpeningCard(opening, false))}

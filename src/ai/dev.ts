@@ -6,3 +6,4 @@ import '@/ai/flows/ai-powered-matchmaking-summaries.ts';
 import '@/ai/flows/swipe-based-teammate-discovery.ts';
 import '@/ai/flows/ai-driven-profile-verification.ts';
 import '@/ai/flows/content-moderation-flow.ts';
+import '@/ai/flows/find-best-opening.ts';

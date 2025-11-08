@@ -54,7 +54,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const getPageTitle = () => {
     if (pathname === '/discover') return 'For You';
-    return pathname.substring(1) || 'For You';
+    const pageName = pathname.split('/')[1];
+    return pageName.charAt(0).toUpperCase() + pageName.slice(1) || 'For You';
   }
 
   if (isMobile) {

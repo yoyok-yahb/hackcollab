@@ -187,15 +187,26 @@ let initialUsers: User[] = [
 export let users: User[] = [];
 
 if (typeof window !== 'undefined') {
-    const savedUsers = localStorage.getItem('users');
-    if (savedUsers) {
-        users = JSON.parse(savedUsers).map((user: any) => ({
-            ...user,
-            rating: user.rating || { average: 4.5, count: 10 }
-        }));
+    const savedUsersJSON = localStorage.getItem('users');
+    if (savedUsersJSON) {
+        const savedUsers = JSON.parse(savedUsersJSON);
+        users = savedUsers.map((user: User) => {
+            const initialUser = initialUsers.find(iu => iu.id === user.id);
+            // If the saved user has no rating or a zero rating, and there's an initial user with a rating, use the initial user's data.
+            if (initialUser && (!user.rating || user.rating.count === 0)) {
+                return initialUser;
+            }
+            // Otherwise, use the saved user, ensuring there's at least a default rating object.
+            return {
+                ...user,
+                rating: user.rating || { average: 4.5, count: 10 }
+            };
+        });
     } else {
         users = initialUsers;
     }
+    // Save the potentially updated user list back to localStorage
+    localStorage.setItem('users', JSON.stringify(users));
 }
 
 const saveUsers = () => {

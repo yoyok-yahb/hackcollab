@@ -148,6 +148,9 @@ export const users: User[] = [
 // Let's assume the current user is 'user1' (Alice) for context
 export const getCurrentUser = () => users[0];
 
+// Function to get a user by their ID
+export const getUserById = (id: string) => users.find(user => user.id === id);
+
 
 export const teamOpenings: TeamOpening[] = [
   {

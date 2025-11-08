@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Info } from 'lucide-react';
+import Link from 'next/link';
 
 export function DiscoverCard({ user, isTopCard }: { user: User; isTopCard: boolean }) {
   return (
@@ -33,9 +34,11 @@ export function DiscoverCard({ user, isTopCard }: { user: User; isTopCard: boole
         </div>
       </CardContent>
        <CardFooter>
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full" asChild>
+          <Link href={`/profile/${user.id}`}>
             <Info className="mr-2 h-4 w-4"/>
             View Full Profile
+          </Link>
         </Button>
       </CardFooter>
     </Card>

@@ -53,9 +53,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const getPageTitle = () => {
-    if (pathname === '/discover') return 'For You';
-    const pageName = pathname.split('/')[1];
-    return pageName.charAt(0).toUpperCase() + pageName.slice(1) || 'For You';
+    const item = navItems.find(item => pathname.startsWith(item.href));
+    if (pathname.startsWith('/profile/')) return 'Profile';
+    if (pathname.startsWith('/messages/')) return 'Messages';
+    return item?.label || 'Hackathon TeamUp';
   }
 
   if (isMobile) {
@@ -66,31 +67,41 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Icons.logo className="h-6 w-6 text-primary" />
             <span className="sr-only">Hackathon TeamUp</span>
           </Link>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle navigation</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-60 p-4">
-              <nav className="flex flex-col gap-2">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
-                      pathname === item.href && 'bg-accent text-accent-foreground'
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
+          <div className="flex items-center gap-2">
+             {pathname === '/discover' && (
+                <Button variant="ghost" size="icon" asChild>
+                  <Link href="/matches">
+                    <Users className="h-6 w-6" />
+                    <span className="sr-only">Your Matches</span>
                   </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+                </Button>
+              )}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle navigation</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-60 p-4">
+                <nav className="flex flex-col gap-2">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        'flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
+                        pathname === item.href && 'bg-accent text-accent-foreground'
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto">{children}</main>
         <footer className="sticky bottom-0 z-10 border-t bg-background">

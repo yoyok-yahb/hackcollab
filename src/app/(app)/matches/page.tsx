@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { generateMatchSummary } from '@/ai/flows/ai-powered-matchmaking-summaries';
 import { cn } from '@/lib/utils';
 import { RatingStars } from '@/components/rating-stars';
+import React from 'react';
 
 
 export default function MatchesPage() {

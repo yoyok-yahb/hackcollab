@@ -29,7 +29,7 @@ import { Icons } from './icons';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { getCurrentUser } from '@/lib/data';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
 import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
@@ -165,49 +165,47 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </Tooltip>
                 </TooltipProvider>
               )}
-              <AlertDialog>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="rounded-full">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={currentUser.image.imageUrl} alt={currentUser.name} />
-                                <AvatarFallback>{currentUser.name ? currentUser.name.charAt(0) : 'U'}</AvatarFallback>
-                            </Avatar>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/profile">Profile</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/settings">Settings</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                         <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600">
-                                    <LogOut className="mr-2 h-4 w-4" />
-                                    Logout
-                                </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        You will be returned to the login screen.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-              </AlertDialog>
+              <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full">
+                          <Avatar className="h-8 w-8">
+                              <AvatarImage src={currentUser.image.imageUrl} alt={currentUser.name} />
+                              <AvatarFallback>{currentUser.name ? currentUser.name.charAt(0) : 'U'}</AvatarFallback>
+                          </Avatar>
+                      </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/settings">Settings</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                       <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600">
+                                  <LogOut className="mr-2 h-4 w-4" />
+                                  Logout
+                              </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      You will be returned to the login screen.
+                                  </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
+                  </DropdownMenuContent>
+              </DropdownMenu>
             </div>
         </header>
         <main className="flex-1 overflow-auto bg-muted/40">{children}</main>

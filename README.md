@@ -61,26 +61,46 @@ To get a local copy up and running, follow these simple steps.
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or later)
-- npm or yarn
+- An active Google AI Studio API Key.
+- `npm` or `yarn`.
 
 ### Installation & Running
 
-1.  Clone the repository:
-    ```sh
-    git clone https://github.com/your-username/hackathon-teamup.git
-    ```
-2.  Navigate to the project directory:
-    ```sh
-    cd hackathon-teamup
-    ```
-3.  Install NPM packages:
+1.  **Clone the Repository**
+    Clone the project repository to your local machine.
+
+2.  **Install Dependencies**
+    Navigate to the project directory and install the required packages:
     ```sh
     npm install
     ```
-4.  Run the development server:
-    ```sh
-    npm run dev
-    ```
-5.  Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+3.  **Set Up Environment Variables**
+    The AI features in this app are powered by Genkit and Google AI. You'll need to configure your Google AI Studio API key.
+
+    - Create a file named `.env` in the root of the project.
+    - Add your API key to the `.env` file:
+      ```
+      GEMINI_API_KEY=your_google_ai_studio_api_key
+      ```
+
+4.  **Run the Application**
+    You need to run two processes in separate terminals: the Next.js frontend and the Genkit AI backend.
+
+    - **Terminal 1: Start the Genkit Server**
+      This runs the AI flows that power the app's intelligent features.
+      ```sh
+      npm run genkit:dev
+      ```
+      This will start the Genkit development server, typically on port 4000, and provide a UI for inspecting your AI flows.
+
+    - **Terminal 2: Start the Next.js Development Server**
+      This runs the user interface and the main application logic.
+      ```sh
+      npm run dev
+      ```
+
+5.  **Open the App**
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 The application is now running! You can start by creating a profile through the onboarding flow and exploring the various features.

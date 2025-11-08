@@ -12,7 +12,12 @@ import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from './ui/toast';
 import Link from 'next/link';
 
-export function DiscoverCardStack({ users }: { users: User[] }) {
+interface DiscoverCardStackProps {
+  users: User[];
+  onReset: () => void;
+}
+
+export function DiscoverCardStack({ users, onReset }: DiscoverCardStackProps) {
   const [stack, setStack] = useState(users);
   const [isAnimating, setIsAnimating] = useState(false);
   const { toast } = useToast();
@@ -67,7 +72,7 @@ export function DiscoverCardStack({ users }: { users: User[] }) {
         <p className="text-muted-foreground mt-2">
           Check back later for new potential teammates.
         </p>
-        <Button className="mt-6" onClick={() => setStack(users)}>
+        <Button className="mt-6" onClick={onReset}>
           Start Over
         </Button>
       </div>

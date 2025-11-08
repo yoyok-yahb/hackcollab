@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { getCurrentUser, User } from '@/lib/data';
 import { Github, Linkedin, Pencil, Twitter } from 'lucide-react';
 import { ProfileVerification } from '@/components/profile-verification';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const user = getCurrentUser();
@@ -21,9 +22,11 @@ export default function ProfilePage() {
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <CardTitle className="text-3xl">{user.name}, {user.age}</CardTitle>
-              <Button variant="outline" size="icon">
-                <Pencil className="h-5 w-5" />
-                <span className="sr-only">Edit Profile</span>
+              <Button asChild variant="outline" size="icon">
+                <Link href="/profile/edit">
+                    <Pencil className="h-5 w-5" />
+                    <span className="sr-only">Edit Profile</span>
+                </Link>
               </Button>
             </div>
             <CardDescription className="mt-2 text-base">{user.bio}</CardDescription>

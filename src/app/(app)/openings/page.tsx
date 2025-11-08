@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -101,8 +102,8 @@ export default function OpeningsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
             {filteredOpenings.map((opening) => {
                 const author = users.find(u => u.id === opening.authorId);
-                const deadlineDate = new Date(opening.deadline);
-                const createdAtDate = new Date(opening.createdAt);
+                const deadlineDate = opening.deadline;
+                const createdAtDate = opening.createdAt;
                 const approvedMembers = opening.approvedMembers?.map(id => getUserById(id)).filter(Boolean) as any[];
 
                 return (

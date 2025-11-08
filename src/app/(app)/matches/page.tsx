@@ -3,9 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { removeMatch, getConversations, getTeamOpenings, User, getCurrentUser } from '@/lib/data';
+import { removeMatch, getConversations, getTeamOpenings, User, getCurrentUser, approveMemberForOpening } from '@/lib/data';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, X, Sparkles, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Sparkles, Loader2, CheckCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useIsClient } from '@/hooks/use-is-client';
@@ -55,6 +55,17 @@ export default function MatchesPage() {
     toast({
         title: "Match Removed",
         description: `You have removed your match with ${userName}.`,
+    });
+    forceRerender();
+  };
+
+  const handleApproveMember = (e: React.MouseEvent, openingId: string, userId: string, userName: string, openingTitle: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    approveMemberForOpening(openingId, userId);
+    toast({
+        title: "Member Approved!",
+        description: `${userName} has been added to your team for "${openingTitle}".`,
     });
     forceRerender();
   };
@@ -112,23 +123,30 @@ export default function MatchesPage() {
                 ))}
               </TabsList>
               {allTabTitles.map((title) => {
-                const users = groupedMatches[title] || [];
+                const usersForOpening = groupedMatches[title] || [];
+                const openingDetails = allOpenings.find(o => o.title === title);
+                const isMyOpening = openingDetails?.authorId === currentUser.id;
+                
                 return (
                 <TabsContent key={title} value={title} className="mt-4">
-                  {users.length > 0 ? (
+                  {usersForOpening.length > 0 ? (
                     <>
-                      <div className="flex justify-end mb-4">
-                        <Button 
-                            onClick={() => findBestMatch(title, users)} 
-                            disabled={isLoading[title]}
-                            variant="outline"
-                        >
-                            {isLoading[title] ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4 text-primary" />}
-                            Find Best Match
-                        </Button>
-                      </div>
+                      {isMyOpening && (
+                        <div className="flex justify-end mb-4">
+                          <Button 
+                              onClick={() => findBestMatch(title, usersForOpening)} 
+                              disabled={isLoading[title]}
+                              variant="outline"
+                          >
+                              {isLoading[title] ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4 text-primary" />}
+                              Find Best Match
+                          </Button>
+                        </div>
+                      )}
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {users.map((user) => (
+                        {usersForOpening.map((user) => {
+                            const isApproved = openingDetails?.approvedMembers.includes(user.id);
+                            return (
                           <Card key={user.id} className={cn("overflow-hidden flex flex-col group relative hover:shadow-lg transition-shadow", { "border-primary border-2 shadow-lg": topMatches[title] === user.id })}>
                             {topMatches[title] === user.id && (
                               <Badge className="absolute top-2 left-2 z-10 bg-primary text-primary-foreground">Top Match</Badge>
@@ -168,8 +186,18 @@ export default function MatchesPage() {
                                 </p>
                               </CardContent>
                             </Link>
-                            <div className="p-4 pt-0">
-                              <Button asChild className="w-full" onClick={(e) => e.stopPropagation()}>
+                             <div className="p-4 pt-0 grid gap-2">
+                               {isMyOpening && (
+                                <Button 
+                                  className="w-full"
+                                  onClick={(e) => handleApproveMember(e, user.teamOpeningId, user.id, user.name, title)}
+                                  disabled={isApproved}
+                                >
+                                  <CheckCircle className="mr-2 h-4 w-4" />
+                                  {isApproved ? 'Approved' : 'Approve for Team'}
+                                </Button>
+                               )}
+                              <Button asChild className="w-full" variant="secondary" onClick={(e) => e.stopPropagation()}>
                                   <Link href={`/messages`}>
                                     <MessageCircle className="mr-2 h-4 w-4" />
                                     Send Message
@@ -177,7 +205,7 @@ export default function MatchesPage() {
                                 </Button>
                             </div>
                           </Card>
-                        ))}
+                        )})}
                       </div>
                     </>
                   ) : (

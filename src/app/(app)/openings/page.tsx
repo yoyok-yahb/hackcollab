@@ -5,9 +5,9 @@ import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening } from '@/lib/data';
+import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening, getUserById } from '@/lib/data';
 import { format, formatDistanceToNow } from 'date-fns';
-import { PlusCircle, Search, MapPin, CalendarClock } from 'lucide-react';
+import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
@@ -101,8 +101,10 @@ export default function OpeningsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
             {filteredOpenings.map((opening) => {
                 const author = users.find(u => u.id === opening.authorId);
-                const deadlineDate = opening.deadline;
-                const createdAtDate = opening.createdAt;
+                const deadlineDate = new Date(opening.deadline);
+                const createdAtDate = new Date(opening.createdAt);
+                const approvedMembers = opening.approvedMembers?.map(id => getUserById(id)).filter(Boolean) as any[];
+
                 return (
             <Card key={opening.id} className="flex flex-col">
                 <CardHeader>
@@ -141,6 +143,17 @@ export default function OpeningsPage() {
                             ))}
                         </div>
                     </div>
+
+                    {approvedMembers && approvedMembers.length > 0 && (
+                       <div className="space-y-2">
+                            <h4 className="font-semibold text-sm flex items-center"><UsersIcon className="mr-2 h-4 w-4"/> Team Members:</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {approvedMembers.map(member => (
+                                    <Badge key={member.id} variant="default">{member.name}</Badge>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                 </CardContent>
                 <CardFooter>

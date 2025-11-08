@@ -35,6 +35,7 @@ export interface TeamOpening {
   location: string;
   deadline: Date;
   createdAt: Date;
+  approvedMembers: string[];
 }
 
 export interface Match {
@@ -246,6 +247,7 @@ let teamOpenings: TeamOpening[] = [
     location: 'Remote',
     deadline: new Date('2024-08-15T23:59:59Z'),
     createdAt: new Date('2024-07-20T10:00:00Z'),
+    approvedMembers: [],
   },
   {
     id: 'opening2',
@@ -257,6 +259,7 @@ let teamOpenings: TeamOpening[] = [
     location: 'New York, NY',
     deadline: new Date('2024-08-01T23:59:59Z'),
     createdAt: new Date('2024-07-19T14:30:00Z'),
+    approvedMembers: [],
   },
   {
     id: 'opening3',
@@ -268,8 +271,18 @@ let teamOpenings: TeamOpening[] = [
     location: 'San Francisco, CA',
     deadline: new Date('2024-09-01T23:59:59Z'),
     createdAt: new Date('2024-07-21T09:00:00Z'),
+    approvedMembers: ['user1'],
   },
 ];
+
+const parseOpeningDates = (openings: any[]): TeamOpening[] => {
+    return openings.map(o => ({
+        ...o,
+        createdAt: new Date(o.createdAt),
+        deadline: new Date(o.deadline),
+        approvedMembers: o.approvedMembers || [],
+    }));
+}
 
 export const getTeamOpenings = (): TeamOpening[] => {
     if (typeof window === 'undefined') {
@@ -277,11 +290,7 @@ export const getTeamOpenings = (): TeamOpening[] => {
     }
     const savedOpenings = localStorage.getItem('teamOpenings');
     if (savedOpenings) {
-        return JSON.parse(savedOpenings).map((o: any) => ({
-            ...o, 
-            createdAt: new Date(o.createdAt), 
-            deadline: new Date(o.deadline)
-        }));
+        return parseOpeningDates(JSON.parse(savedOpenings));
     } else {
         localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
         return teamOpenings;
@@ -295,17 +304,35 @@ const saveTeamOpenings = (openings: TeamOpening[]) => {
    }
 }
 
-export const addTeamOpening = (opening: Omit<TeamOpening, 'id' | 'createdAt'>) => {
+export const addTeamOpening = (opening: Omit<TeamOpening, 'id' | 'createdAt' | 'approvedMembers'>) => {
     const currentOpenings = getTeamOpenings();
     const newOpening: TeamOpening = {
       ...opening,
       id: `opening${Date.now()}`,
       createdAt: new Date(),
+      approvedMembers: [],
     };
     const updatedOpenings = [newOpening, ...currentOpenings];
     saveTeamOpenings(updatedOpenings);
     return newOpening;
 }
+
+export const approveMemberForOpening = (openingId: string, userId: string) => {
+  let openings = getTeamOpenings();
+  const openingIndex = openings.findIndex(o => o.id === openingId);
+
+  if (openingIndex !== -1) {
+    const opening = openings[openingIndex];
+    if (!opening.approvedMembers) {
+      opening.approvedMembers = [];
+    }
+    if (!opening.approvedMembers.includes(userId)) {
+      opening.approvedMembers.push(userId);
+      openings[openingIndex] = opening;
+      saveTeamOpenings(openings);
+    }
+  }
+};
 
 
 let matches: Match[] = [];

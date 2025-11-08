@@ -280,6 +280,8 @@ const loadTeamOpenings = () => {
                 createdAt: new Date(o.createdAt), 
                 deadline: new Date(o.deadline)
             }));
+        } else {
+             localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
         }
     }
 }

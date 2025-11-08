@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, teamOpenings, users, addMatch } from '@/lib/data';
-import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { PlusCircle, Search, MapPin, CalendarClock } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -67,7 +67,7 @@ export default function OpeningsPage() {
   });
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
+    <div className="container mx-auto p-4 md:p-6" key={openingsVersion}>
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold">Team Openings</h1>
         <div className="flex w-full md:w-auto items-center gap-2">

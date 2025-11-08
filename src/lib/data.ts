@@ -271,16 +271,20 @@ export let teamOpenings: TeamOpening[] = [
   },
 ];
 
-if (typeof window !== 'undefined') {
-    const savedOpenings = localStorage.getItem('teamOpenings');
-    if (savedOpenings) {
-        teamOpenings = JSON.parse(savedOpenings).map((o: any) => ({
-            ...o, 
-            createdAt: new Date(o.createdAt), 
-            deadline: new Date(o.deadline)
-        }));
+const loadTeamOpenings = () => {
+    if (typeof window !== 'undefined') {
+        const savedOpenings = localStorage.getItem('teamOpenings');
+        if (savedOpenings) {
+            teamOpenings = JSON.parse(savedOpenings).map((o: any) => ({
+                ...o, 
+                createdAt: new Date(o.createdAt), 
+                deadline: new Date(o.deadline)
+            }));
+        }
     }
 }
+// Load once on initial script execution
+loadTeamOpenings();
 
 
 const saveTeamOpenings = () => {

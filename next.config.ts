@@ -23,12 +23,18 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'httpshttps',
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
       },
     ],
+  },
+  experimental: {
+    // This is to allow cross-origin requests in development.
+    // In a real production app, you'd want to be more specific
+    // about the allowed origins.
+    allowedDevOrigins: ['*'],
   },
 };
 

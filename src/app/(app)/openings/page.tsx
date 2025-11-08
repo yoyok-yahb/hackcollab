@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -98,7 +97,7 @@ export default function OpeningsPage() {
     return (
         (opening.hackathonName && opening.hackathonName.toLowerCase().includes(searchLower)) ||
         (opening.problemStatement && opening.problemStatement.toLowerCase().includes(searchLower)) ||
-        opening.location.toLowerCase().includes(searchLower) ||
+        (opening.location && opening.location.toLowerCase().includes(searchLower)) ||
         (author && author.name.toLowerCase().includes(searchLower)) ||
         opening.requiredRoles.some(role => role.toLowerCase().includes(searchLower)) ||
         opening.techStack.some(tech => tech.toLowerCase().includes(searchLower))
@@ -135,8 +134,8 @@ export default function OpeningsPage() {
 
   const renderOpeningCard = (opening: TeamOpening, isMyOpening: boolean) => {
     const author = users.find(u => u.id === opening.authorId);
-    const deadlineDate = opening.deadline;
-    const createdAtDate = opening.createdAt;
+    const deadlineDate = new Date(opening.deadline);
+    const createdAtDate = new Date(opening.createdAt);
     const approvedMembers = opening.approvedMembers?.map(id => getUserById(id)).filter(Boolean) as any[];
 
     return (

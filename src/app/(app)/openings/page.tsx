@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening, getUserById, deleteTeamOpening, removeMemberFromOpening } from '@/lib/data';
 import { format, formatDistanceToNow } from 'date-fns';
-import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Edit, Trash2, X } from 'lucide-react';
+import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Trash2, X } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 
 export default function OpeningsPage() {
@@ -268,3 +268,4 @@ export default function OpeningsPage() {
     </div>
   );
 }
+

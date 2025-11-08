@@ -1,3 +1,4 @@
+
 import type { ImagePlaceholder } from './placeholder-images';
 import { PlaceHolderImages } from './placeholder-images';
 
@@ -273,9 +274,14 @@ export let teamOpenings: TeamOpening[] = [
 if (typeof window !== 'undefined') {
     const savedOpenings = localStorage.getItem('teamOpenings');
     if (savedOpenings) {
-        teamOpenings = JSON.parse(savedOpenings).map((o: any) => ({...o, createdAt: new Date(o.createdAt), deadline: new Date(o.deadline)}));
+        teamOpenings = JSON.parse(savedOpenings).map((o: TeamOpening) => ({
+            ...o, 
+            createdAt: new Date(o.createdAt), 
+            deadline: new Date(o.deadline)
+        }));
     }
 }
+
 
 const saveTeamOpenings = () => {
     if (typeof window !== 'undefined') {

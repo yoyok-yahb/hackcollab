@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, teamOpenings, users, addMatch } from '@/lib/data';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { PlusCircle, Search, MapPin, CalendarClock } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -97,12 +97,15 @@ export default function OpeningsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
             {filteredOpenings.map((opening) => {
                 const author = users.find(u => u.id === opening.authorId);
+                // Ensure deadline is a Date object
+                const deadlineDate = typeof opening.deadline === 'string' ? parseISO(opening.deadline) : opening.deadline;
+                const createdAtDate = typeof opening.createdAt === 'string' ? parseISO(opening.createdAt) : opening.createdAt;
                 return (
             <Card key={opening.id} className="flex flex-col">
                 <CardHeader>
                 <CardTitle>{opening.title}</CardTitle>
                 <CardDescription>
-                    Posted by {author?.name} • {formatDistanceToNow(opening.createdAt, { addSuffix: true })}
+                    Posted by {author?.name} • {formatDistanceToNow(createdAtDate, { addSuffix: true })}
                 </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-4">
@@ -115,7 +118,7 @@ export default function OpeningsPage() {
 
                     <div className="flex items-center text-sm text-muted-foreground">
                         <CalendarClock className="mr-2 h-4 w-4" />
-                        <span>Apply by {format(opening.deadline, 'PPP')}</span>
+                        <span>Apply by {format(deadlineDate, 'PPP')}</span>
                     </div>
 
                     <div className="space-y-2">
@@ -141,9 +144,9 @@ export default function OpeningsPage() {
                 <Button 
                     className="w-full"
                     onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
-                    disabled={new Date() > opening.deadline}
+                    disabled={new Date() > deadlineDate}
                 >
-                    {new Date() > opening.deadline ? 'Deadline Passed' : 'Express Interest'}
+                    {new Date() > deadlineDate ? 'Deadline Passed' : 'Express Interest'}
                 </Button>
                 </CardFooter>
             </Card>

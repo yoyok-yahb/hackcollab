@@ -11,7 +11,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const SuggestProblemStatementsInputSchema = z.object({
+const SuggestProblemStatementsInputSchema = z.object({
   domain: z.string().describe('The domain or area of interest (e.g., healthcare, finance).'),
 });
 
@@ -22,7 +22,7 @@ const ProblemStatementSchema = z.object({
     difficulty: z.enum(['Beginner', 'Intermediate', 'Advanced']).describe('The estimated difficulty level.'),
 });
 
-export const SuggestProblemStatementsOutputSchema = z.array(ProblemStatementSchema);
+const SuggestProblemStatementsOutputSchema = z.array(ProblemStatementSchema);
 
 export type SuggestProblemStatementsOutput = z.infer<typeof SuggestProblemStatementsOutputSchema>;
 

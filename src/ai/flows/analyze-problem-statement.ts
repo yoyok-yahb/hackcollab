@@ -12,14 +12,14 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const AnalyzeProblemStatementInputSchema = z.object({
+const AnalyzeProblemStatementInputSchema = z.object({
   problemStatement: z.string().describe('The problem statement to analyze.'),
   solutionAttempt: z.string().optional().describe('An optional existing solution to analyze and get feedback on.'),
 });
 
 export type AnalyzeProblemStatementInput = z.infer<typeof AnalyzeProblemStatementInputSchema>;
 
-export const AnalyzeProblemStatementOutputSchema = z.object({
+const AnalyzeProblemStatementOutputSchema = z.object({
   solution: z.string().describe('A potential solution for the problem statement.'),
   techStack: z.array(z.string()).describe('A suggested tech stack to implement the solution.'),
   workflowDiagram: z.string().describe('A simple text-based workflow diagram (e.g., using -> arrows).'),

@@ -1,0 +1,66 @@
+'use client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { PlusCircle, Trash2, Trophy, Upload } from 'lucide-react';
+import { Textarea } from '../ui/textarea';
+import { useState } from 'react';
+
+interface OnboardingStepProps {
+  onNext: () => void;
+  onBack: () => void;
+}
+
+export function OnboardingStep4({ onNext, onBack }: OnboardingStepProps) {
+  const [experiences, setExperiences] = useState([{ name: '', description: '', certificate: null }]);
+
+  const handleAddExperience = () => {
+    setExperiences([...experiences, { name: '', description: '', certificate: null }]);
+  }
+  const handleRemoveExperience = (index: number) => {
+    const newExperiences = [...experiences];
+    newExperiences.splice(index, 1);
+    setExperiences(newExperiences);
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Hackathon Experience</CardTitle>
+        <CardDescription>Tell us about your past hackathon glories. No experience? No problem, just skip ahead.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {experiences.map((exp, index) => (
+             <div key={index} className="space-y-3 rounded-lg border p-4 relative">
+                {experiences.length > 1 && (
+                     <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-muted-foreground" onClick={() => handleRemoveExperience(index)}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                )}
+                <div className="space-y-2">
+                    <Label htmlFor={`hackathon-name-${index}`}>Hackathon Name</Label>
+                    <Input id={`hackathon-name-${index}`} placeholder="e.g., Hack The Planet 2023" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor={`hackathon-description-${index}`}>Your Project & Achievement</Label>
+                    <Textarea id={`hackathon-description-${index}`} placeholder="Briefly describe the project you built and any awards you won." />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor={`certificate-${index}`}>Certificate (Optional)</Label>
+                    <Input id={`certificate-${index}`} type="file" className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90" />
+                </div>
+            </div>
+        ))}
+         <Button variant="outline" className="w-full" onClick={handleAddExperience}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add another experience
+        </Button>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" onClick={onBack}>Back</Button>
+        <Button onClick={onNext}>Continue</Button>
+      </CardFooter>
+    </Card>
+  );
+}

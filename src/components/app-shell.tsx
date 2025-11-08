@@ -2,10 +2,11 @@
 
 import * as React from 'react';
 import Link, { type LinkProps } from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Briefcase,
   Home,
+  LogOut,
   Menu,
   MessageCircle,
   Sparkles,
@@ -27,6 +28,8 @@ import { Icons } from './icons';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { getCurrentUser } from '@/lib/data';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
+import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
   { href: '/discover', icon: Sparkles, label: 'Discover' },
@@ -39,7 +42,14 @@ const navItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
   const pathname = usePathname();
+  const { logout } = useAuth();
+  const router = useRouter();
   const currentUser = getCurrentUser();
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  }
 
   if (isMobile) {
     return (
@@ -98,6 +108,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
+    <AlertDialog>
     <div className="grid min-h-screen w-full grid-cols-[auto_1fr]">
       <aside className="flex h-full flex-col border-r bg-background">
         <div className="flex h-14 items-center justify-center border-b px-4">
@@ -148,12 +159,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </DropdownMenuItem>
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Logout</DropdownMenuItem>
+                    <AlertDialogTrigger asChild>
+                        <DropdownMenuItem>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Logout
+                        </DropdownMenuItem>
+                    </AlertDialogTrigger>
                 </DropdownMenuContent>
             </DropdownMenu>
         </header>
         <main className="flex-1 overflow-auto bg-muted/40">{children}</main>
       </div>
     </div>
+    <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+            <AlertDialogDescription>
+                You will be returned to the login screen.
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
+        </AlertDialogFooter>
+    </AlertDialogContent>
+    </AlertDialog>
   );
 }

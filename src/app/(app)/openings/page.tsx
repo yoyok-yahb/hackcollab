@@ -49,7 +49,7 @@ export default function OpeningsPage() {
       description: `You've matched for "${openingTitle}". Start the conversation!`,
       action: (
         <ToastAction asChild altText="Message">
-          <Link href={`/messages/conv-${newMatch.id}`}>Message</Link>
+          <Link href={`/messages/conv-match-${newMatch.id}`}>Message</Link>
         </ToastAction>
       ),
     });

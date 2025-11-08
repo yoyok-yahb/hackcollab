@@ -209,7 +209,7 @@ export const saveCurrentUser = (user: User) => {
     // Check if the image is a large base64 string. If so, don't save it to avoid quota errors.
     // In a real app, you would upload this to a storage service and save the URL.
     if (userToSave.image.imageUrl && userToSave.image.imageUrl.startsWith('data:image')) {
-       userToSave.image.imageUrl = `https://picsum.photos/seed/${Date.now()}/200/200`;
+       userToSave.image.imageUrl = user.image.imageUrl;
     }
 
     localStorage.setItem('currentUser', JSON.stringify(userToSave));
@@ -273,8 +273,8 @@ let teamOpenings: TeamOpening[] = [
     problemStatement: 'Build a mobile app that uses AI to analyze spending habits and provide personalized financial advice.',
     requiredRoles: ['Frontend Developer', 'UI/UX Designer', 'Data Scientist'],
     techStack: ['React Native', 'Python', 'TensorFlow', 'Figma', 'Firebase'],
-    deadline: new Date('2024-08-15T23:59:59Z'),
-    hackathonEndDate: new Date('2024-08-18T17:00:00Z'),
+    deadline: new Date(new Date().setDate(new Date().getDate() + 15)),
+    hackathonEndDate: new Date(new Date().setDate(new Date().getDate() + 18)),
     createdAt: new Date('2024-07-20T10:00:00Z'),
     approvedMembers: [],
     tasks: [],
@@ -289,8 +289,8 @@ let teamOpenings: TeamOpening[] = [
     problemStatement: 'A platform to help people discover and join local events and community activities, with a focus on spontaneous meetups.',
     requiredRoles: ['Full-stack Developer', 'Mobile Developer (iOS)'],
     techStack: ['Next.js', 'Firebase', 'Swift', 'Mapbox API'],
-    deadline: new Date('2024-08-01T23:59:59Z'),
-    hackathonEndDate: new Date('2024-08-04T17:00:00Z'),
+    deadline: new Date(new Date().setDate(new Date().getDate() + 10)),
+    hackathonEndDate: new Date(new Date().setDate(new Date().getDate() + 13)),
     createdAt: new Date('2024-07-19T14:30:00Z'),
     approvedMembers: [],
     tasks: [],
@@ -305,8 +305,8 @@ let teamOpenings: TeamOpening[] = [
     problemStatement: 'Create an engaging language learning app that uses gamification, leaderboards, and interactive stories to make learning fun.',
     requiredRoles: ['Backend Developer (Node.js)', 'Data Scientist', 'Frontend Developer'],
     techStack: ['Node.js', 'PostgreSQL', 'Python', 'React', 'D3.js'],
-    deadline: new Date('2024-09-01T23:59:59Z'),
-    hackathonEndDate: new Date('2024-09-04T17:00:00Z'),
+    deadline: new Date(new Date().setDate(new Date().getDate() + 25)),
+    hackathonEndDate: new Date(new Date().setDate(new Date().getDate() + 28)),
     createdAt: new Date('2024-07-21T09:00:00Z'),
     approvedMembers: ['user1'],
     tasks: [],
@@ -321,8 +321,8 @@ let teamOpenings: TeamOpening[] = [
     problemStatement: 'Develop a wearable tech solution to monitor and improve posture for remote workers.',
     requiredRoles: ['Firmware Engineer', 'Mobile Developer (Android)', 'Cloud Backend Engineer'],
     techStack: ['C++', 'Kotlin', 'GCP', 'Bluetooth LE'],
-    deadline: new Date('2024-08-25T23:59:59Z'),
-    hackathonEndDate: new Date('2024-08-28T17:00:00Z'),
+    deadline: new Date(new Date().setDate(new Date().getDate() + 20)),
+    hackathonEndDate: new Date(new Date().setDate(new Date().getDate() + 23)),
     createdAt: new Date('2024-07-22T11:00:00Z'),
     approvedMembers: [],
     tasks: [],
@@ -337,8 +337,8 @@ let teamOpenings: TeamOpening[] = [
     problemStatement: 'Design a decentralized identity verification system using blockchain to enhance security and privacy in financial applications.',
     requiredRoles: ['Blockchain Developer', 'Smart Contract Auditor', 'Frontend Dev (React)'],
     techStack: ['Solidity', 'Ethereum', 'Hardhat', 'Next.js', 'ethers.js'],
-    deadline: new Date('2024-09-10T23:59:59Z'),
-    hackathonEndDate: new Date('2024-09-13T17:00:00Z'),
+    deadline: new Date(new Date().setDate(new Date().getDate() + 30)),
+    hackathonEndDate: new Date(new Date().setDate(new Date().getDate() + 33)),
     createdAt: new Date('2024-07-22T18:00:00Z'),
     approvedMembers: [],
     tasks: [],

@@ -14,14 +14,11 @@ import { ToastAction } from '@/components/ui/toast';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { EditOpeningDialog } from '@/components/edit-opening-dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 
 export default function OpeningsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedOpening, setSelectedOpening] = useState<TeamOpening | null>(null);
   const [openings, setOpenings] = useState<TeamOpening[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [tick, setTick] = useState(0);
@@ -36,15 +33,6 @@ export default function OpeningsPage() {
 
   const handleOpeningCreated = () => {
     forceRerender();
-  };
-  
-  const handleOpeningUpdated = () => {
-    forceRerender();
-  }
-
-  const handleEditClick = (opening: TeamOpening) => {
-    setSelectedOpening(opening);
-    setIsEditDialogOpen(true);
   };
   
   const handleExpressInterest = (openingAuthorId: string, openingId: string, openingTitle: string) => {
@@ -175,9 +163,6 @@ export default function OpeningsPage() {
             <CardFooter>
             {isMyOpening ? (
                 <div className="w-full flex gap-2">
-                    <Button className="w-full" variant="outline" onClick={() => handleEditClick(opening)}>
-                        <Edit className="mr-2 h-4 w-4" /> Edit
-                    </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button className="w-full" variant="destructive">
@@ -242,16 +227,6 @@ export default function OpeningsPage() {
         </div>
       </div>
       
-      {selectedOpening && (
-          <EditOpeningDialog 
-            key={selectedOpening.id}
-            open={isEditDialogOpen}
-            onOpenChange={setIsEditDialogOpen}
-            onOpeningUpdated={handleOpeningUpdated}
-            opening={selectedOpening}
-          />
-      )}
-
       <Accordion type="multiple" defaultValue={['your-openings', 'other-openings']} className="w-full space-y-6">
         <AccordionItem value="your-openings">
             <AccordionTrigger className="text-xl font-semibold">Your Openings</AccordionTrigger>

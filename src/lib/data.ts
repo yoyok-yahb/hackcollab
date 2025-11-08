@@ -54,7 +54,7 @@ const getUserImage = (id: string): ImagePlaceholder => {
   return PlaceHolderImages.find((img) => img.id === id) || PlaceHolderImages[1];
 };
 
-export const users: User[] = [
+export let users: User[] = [
   {
     id: 'user1',
     name: 'Alice',
@@ -152,6 +152,20 @@ export const users: User[] = [
   }
 ];
 
+if (typeof window !== 'undefined') {
+    const savedUsers = localStorage.getItem('users');
+    if (savedUsers) {
+        users = JSON.parse(savedUsers);
+    }
+}
+
+const saveUsers = () => {
+     if (typeof window !== 'undefined') {
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+}
+
+
 // Default user data, can be customized
 const defaultUser: User = {
     id: `user${Date.now()}`,
@@ -170,6 +184,15 @@ const defaultUser: User = {
 export const saveCurrentUser = (user: User) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('currentUser', JSON.stringify(user));
+
+    const userIndex = users.findIndex(u => u.id === user.id);
+    if(userIndex > -1) {
+        users[userIndex] = user;
+    } else {
+        users.push(user);
+    }
+    saveUsers();
+
   }
 };
 
@@ -209,7 +232,7 @@ export const getUserById = (id: string) => {
 }
 
 
-export const teamOpenings: TeamOpening[] = [
+export let teamOpenings: TeamOpening[] = [
   {
     id: 'opening1',
     title: 'AI-Powered Personal Finance Advisor',
@@ -239,6 +262,31 @@ export const teamOpenings: TeamOpening[] = [
   },
 ];
 
+if (typeof window !== 'undefined') {
+    const savedOpenings = localStorage.getItem('teamOpenings');
+    if (savedOpenings) {
+        teamOpenings = JSON.parse(savedOpenings).map((o: any) => ({...o, createdAt: new Date(o.createdAt)}));
+    }
+}
+
+const saveTeamOpenings = () => {
+    if (typeof window !== 'undefined') {
+       localStorage.setItem('teamOpenings', JSON.stringify(teamOpenings));
+   }
+}
+
+export const addTeamOpening = (opening: Omit<TeamOpening, 'id' | 'createdAt'>) => {
+    const newOpening: TeamOpening = {
+      ...opening,
+      id: `opening${Date.now()}`,
+      createdAt: new Date(),
+    };
+    teamOpenings.unshift(newOpening);
+    saveTeamOpenings();
+    return newOpening;
+}
+
+
 let matches: Match[] = [];
 if (typeof window !== 'undefined') {
     const savedMatches = localStorage.getItem('matches');
@@ -255,6 +303,16 @@ const saveMatches = () => {
 
 // Function to add a match
 export const addMatch = (match: Omit<Match, 'id' | 'createdAt'>) => {
+  // Prevent duplicate matches for the same opening
+  const existingMatch = matches.find(m => 
+    m.teamOpeningId === match.teamOpeningId &&
+    ((m.userId1 === match.userId1 && m.userId2 === match.userId2) || (m.userId1 === match.userId2 && m.userId2 === match.userId1))
+  );
+
+  if (existingMatch) {
+    return existingMatch;
+  }
+  
   const newMatch: Match = {
     ...match,
     id: `match${Date.now()}`,
@@ -282,6 +340,8 @@ if (typeof window !== 'undefined') {
     const savedMessages = localStorage.getItem('messages');
     if (savedMessages) {
         messages = JSON.parse(savedMessages).map((m: any) => ({...m, createdAt: new Date(m.createdAt)}));
+    } else {
+        localStorage.setItem('messages', '[]');
     }
 }
 
@@ -309,7 +369,8 @@ export const addMessage = (message: Omit<Message, 'id' | 'createdAt'>) => {
 }
 
 const getLastMessageForConversation = (conversationId: string): Message | undefined => {
-    return getMessagesForConversation(conversationId).pop();
+    const convMessages = getMessagesForConversation(conversationId);
+    return convMessages[convMessages.length - 1];
 }
 
 

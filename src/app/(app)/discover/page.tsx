@@ -1,3 +1,4 @@
+
 'use client';
 
 import { DiscoverCardStack } from '@/components/discover-card-stack';
@@ -26,6 +27,12 @@ export default function DiscoverPage() {
       const potentialTeammates = allUsers.filter(
         (user) => user.id !== currentUser.id && !matchedUserIds.has(user.id)
       );
+      
+      if (potentialTeammates.length === 0) {
+        setRankedUsers([]);
+        setIsLoading(false);
+        return;
+      }
       
       const userOpenings = getTeamOpenings().filter(o => o.authorId === currentUser.id);
       const latestOpening = userOpenings.length > 0 ? userOpenings[0] : undefined;

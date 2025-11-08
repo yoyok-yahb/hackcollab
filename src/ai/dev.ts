@@ -10,3 +10,5 @@ import '@/ai/flows/content-moderation-flow.ts';
 import '@/ai/flows/find-best-opening.ts';
 import '@/ai/flows/analyze-problem-statement.ts';
 import '@/ai/flows/suggest-problem-statements.ts';
+import '@/ai/flows/general-hackathon-query.ts';
+

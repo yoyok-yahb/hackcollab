@@ -9,6 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { analyzeProblemStatement, AnalyzeProblemStatementOutput, AnalyzeProblemStatementInput } from '@/ai/flows/analyze-problem-statement';
 import { suggestProblemStatements, SuggestProblemStatementsOutput, SuggestProblemStatementsInput } from '@/ai/flows/suggest-problem-statements';
+import { generalHackathonQuery } from '@/ai/flows/general-hackathon-query';
 import { getCurrentUser } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Send, Loader2 } from 'lucide-react';
@@ -73,7 +74,7 @@ export default function LearnPage() {
     }
   };
 
-  const processAIResponse = (response: any, type: 'analysis' | 'suggestion') => {
+  const processAIResponse = (response: any, type: 'analysis' | 'suggestion' | 'general') => {
     if (type === 'analysis') {
         const analysisJsx = (
             <Card className="bg-background">
@@ -121,6 +122,8 @@ export default function LearnPage() {
         );
         addMessage('bot', suggestionJsx);
         setTimeout(() => addMessage('bot', "Let me know which one you'd like to analyze, or you can provide your own."), 500);
+    } else if (type === 'general') {
+        addMessage('bot', response.answer);
     }
   }
 
@@ -143,9 +146,9 @@ export default function LearnPage() {
             processAIResponse(suggestions, 'suggestion');
             setConversationState('awaiting_statement_choice');
         } else {
-             // Fallback for general conversation - in a real app this would be a more robust RAG or conversational agent
-            const analysis = await analyzeProblemStatement({ problemStatement: userMessage });
-            processAIResponse(analysis, 'analysis');
+             // Fallback for general conversation
+            const response = await generalHackathonQuery({ query: userMessage });
+            processAIResponse(response, 'general');
             setConversationState('idle');
         }
     } catch (err) {

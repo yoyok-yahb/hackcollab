@@ -1,18 +1,24 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
-import { getTeamOpenings, getUserById, User } from '@/lib/data';
+import { getTeamOpenings, getUserById, User, removeMemberFromOpening, getCurrentUser } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CalendarClock, MapPin, Users as UsersIcon } from 'lucide-react';
+import { ArrowLeft, CalendarClock, MapPin, Users as UsersIcon, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 export default function GroupChatDetailsPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const params = use(paramsPromise);
   const openingId = params.id.replace('conv-group-', '');
+  const { toast } = useToast();
+  const [tick, setTick] = useState(0);
+  const forceRerender = () => setTick(t => t+1);
+  const currentUser = getCurrentUser();
+  
   const allOpenings = getTeamOpenings();
   const opening = allOpenings.find(o => o.id === openingId);
 
@@ -26,10 +32,20 @@ export default function GroupChatDetailsPage({ params: paramsPromise }: { params
       </div>
     );
   }
+  
+  const handleRemoveMember = (openingId: string, userId: string, userName: string) => {
+    removeMemberFromOpening(openingId, userId);
+    toast({
+        title: "Member Removed",
+        description: `${userName} has been removed from the team.`
+    });
+    forceRerender();
+  }
 
   const author = getUserById(opening.authorId);
   const approvedMembers = opening.approvedMembers?.map(id => getUserById(id)).filter(Boolean) as User[];
   const allMembers = author ? [author, ...approvedMembers] : approvedMembers;
+  const isMyOpening = opening.authorId === currentUser.id;
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -93,15 +109,26 @@ export default function GroupChatDetailsPage({ params: paramsPromise }: { params
                 <CardContent>
                     <ul className="space-y-4">
                         {allMembers.map(member => (
-                            <li key={member.id} className="flex items-center gap-3">
+                            <li key={member.id} className="flex items-center gap-3 group">
                                 <Avatar>
                                     <AvatarImage src={member.image.imageUrl} alt={member.name} />
                                     <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <div>
+                                <div className="flex-1">
                                     <p className="font-semibold">{member.name}</p>
                                     <p className="text-sm text-muted-foreground">{member.id === opening.authorId ? 'Team Lead' : 'Member'}</p>
                                 </div>
+                                {isMyOpening && member.id !== currentUser.id && (
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="h-7 w-7 text-muted-foreground opacity-0 group-hover:opacity-100"
+                                        onClick={() => handleRemoveMember(opening.id, member.id, member.name)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                        <span className="sr-only">Remove member</span>
+                                    </Button>
+                                )}
                             </li>
                         ))}
                     </ul>

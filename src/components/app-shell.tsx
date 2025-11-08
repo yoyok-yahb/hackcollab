@@ -29,11 +29,11 @@ import { Icons } from './icons';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { getCurrentUser } from '@/lib/data';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
-  { href: '/discover', icon: Sparkles, label: 'Discover' },
+  { href: '/discover', icon: Sparkles, label: 'For You' },
   { href: '/matches', icon: Users, label: 'Matches' },
   { href: '/messages', icon: MessageCircle, label: 'Messages' },
   { href: '/openings', icon: Briefcase, label: 'Openings' },
@@ -50,6 +50,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const handleLogout = () => {
     logout();
     router.push('/login');
+  }
+
+  const getPageTitle = () => {
+    if (pathname === '/discover') return 'For You';
+    return pathname.substring(1) || 'For You';
   }
 
   if (isMobile) {
@@ -95,7 +100,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={cn(
                   'flex flex-col items-center gap-1 rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent',
-                  pathname === item.href ? 'text-primary' : 'hover:text-accent-foreground'
+                  pathname.startsWith(item.href) ? 'text-primary' : 'hover:text-accent-foreground'
                 )}
               >
                 <item.icon className="h-6 w-6" />
@@ -126,7 +131,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={cn(
                       'flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-9 md:w-9',
-                      pathname === item.href ? 'bg-accent text-accent-foreground' : ''
+                       pathname.startsWith(item.href) ? 'bg-accent text-accent-foreground' : ''
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -141,48 +146,69 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
       <div className="flex flex-col">
         <header className="flex h-14 items-center justify-between gap-4 border-b bg-background px-4 lg:px-6">
-            <h1 className="text-xl font-semibold capitalize">{pathname.substring(1) || 'Discover'}</h1>
-            <AlertDialog>
-              <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full">
-                          <Avatar className="h-8 w-8">
-                              <AvatarImage src={currentUser.image.imageUrl} alt={currentUser.name} />
-                              <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                      </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/profile">Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/settings">Settings</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <AlertDialogTrigger asChild>
-                          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                              <LogOut className="mr-2 h-4 w-4" />
-                              Logout
-                          </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                  </DropdownMenuContent>
-              </DropdownMenu>
-              <AlertDialogContent>
-                  <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                          You will be returned to the login screen.
-                      </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
-                  </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <h1 className="text-xl font-semibold capitalize">{getPageTitle()}</h1>
+            <div className="flex items-center gap-2">
+              {pathname === '/discover' && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                       <Button variant="ghost" size="icon" asChild>
+                          <Link href="/matches">
+                            <Users className="h-5 w-5" />
+                            <span className="sr-only">Your Matches</span>
+                          </Link>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Your Matches</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              <AlertDialog>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="rounded-full">
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={currentUser.image.imageUrl} alt={currentUser.name} />
+                                <AvatarFallback>{currentUser.name ? currentUser.name.charAt(0) : 'U'}</AvatarFallback>
+                            </Avatar>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/profile">Profile</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/settings">Settings</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Logout
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        You will be returned to the login screen.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+              </AlertDialog>
+            </div>
         </header>
         <main className="flex-1 overflow-auto bg-muted/40">{children}</main>
       </div>

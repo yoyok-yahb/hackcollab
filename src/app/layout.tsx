@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/hooks/use-auth';
+import { ThemeProvider } from '@/hooks/use-theme';
 
 export const metadata: Metadata = {
   title: 'Hackathon TeamUp',
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -25,9 +26,11 @@ export default function RootLayout({
         />
       </head>
       <body className={cn('font-body antialiased h-full')}>
-        <AuthProvider>
-            {children}
-        </AuthProvider>
+        <ThemeProvider>
+            <AuthProvider>
+                {children}
+            </AuthProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

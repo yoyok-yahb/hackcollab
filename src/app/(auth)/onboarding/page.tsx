@@ -7,6 +7,7 @@ import { OnboardingStep4 } from '@/components/onboarding/step4-experience';
 import { OnboardingStep5 } from '@/components/onboarding/step5-interests';
 import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
+import { saveCurrentUser, getCurrentUser, User } from '@/lib/data';
 
 const steps = [
     { component: OnboardingStep1, title: "Personal Details" },
@@ -18,13 +19,19 @@ const steps = [
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [onboardingData, setOnboardingData] = useState<Partial<User>>(() => getCurrentUser());
   const router = useRouter();
+
+  const updateOnboardingData = (data: Partial<User>) => {
+    setOnboardingData(prev => ({...prev, ...data}));
+  };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       // Finish onboarding
+      saveCurrentUser(onboardingData as User);
       router.push('/discover');
     }
   };
@@ -45,7 +52,7 @@ export default function OnboardingPage() {
                 <p className="text-muted-foreground">Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}</p>
              </div>
             <Progress value={((currentStep + 1) / steps.length) * 100} className="mb-8 w-full" />
-            <CurrentStepComponent onNext={handleNext} onBack={handleBack} />
+            <CurrentStepComponent onNext={handleNext} onBack={handleBack} data={onboardingData} setData={updateOnboardingData} />
         </div>
     </div>
   );

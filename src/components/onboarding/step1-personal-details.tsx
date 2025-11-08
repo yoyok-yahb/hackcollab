@@ -4,13 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Github, Linkedin, Twitter } from 'lucide-react';
+import type { User } from '@/lib/data';
 
 interface OnboardingStepProps {
   onNext: () => void;
   onBack: () => void;
+  data: Partial<User>;
+  setData: (data: Partial<User>) => void;
 }
 
-export function OnboardingStep1({ onNext }: OnboardingStepProps) {
+export function OnboardingStep1({ onNext, data, setData }: OnboardingStepProps) {
   return (
     <Card>
       <CardHeader>
@@ -21,11 +24,11 @@ export function OnboardingStep1({ onNext }: OnboardingStepProps) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
-              <Input id="name" placeholder="Ada Lovelace" />
+              <Input id="name" placeholder="Ada Lovelace" value={data.name} onChange={(e) => setData({ name: e.target.value })}/>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" placeholder="ada@example.com" />
+              <Input id="email" type="email" placeholder="ada@example.com" value={data.email} onChange={(e) => setData({ email: e.target.value })}/>
             </div>
         </div>
         <div className="space-y-2">
@@ -46,15 +49,15 @@ export function OnboardingStep1({ onNext }: OnboardingStepProps) {
           <div className="space-y-2">
              <div className="flex items-center gap-2">
                 <Github className="h-5 w-5 text-muted-foreground" />
-                <Input placeholder="https://github.com/your-username" />
+                <Input placeholder="https://github.com/your-username" value={data.socialLinks?.github} onChange={(e) => setData({ socialLinks: {...data.socialLinks, github: e.target.value}})} />
              </div>
              <div className="flex items-center gap-2">
                 <Linkedin className="h-5 w-5 text-muted-foreground" />
-                <Input placeholder="https://linkedin.com/in/your-username" />
+                <Input placeholder="https://linkedin.com/in/your-username" value={data.socialLinks?.linkedin} onChange={(e) => setData({ socialLinks: {...data.socialLinks, linkedin: e.target.value}})} />
              </div>
               <div className="flex items-center gap-2">
                 <Twitter className="h-5 w-5 text-muted-foreground" />
-                <Input placeholder="https://twitter.com/your-username" />
+                <Input placeholder="https://twitter.com/your-username" value={data.socialLinks?.twitter} onChange={(e) => setData({ socialLinks: {...data.socialLinks, twitter: e.target.value}})} />
              </div>
           </div>
         </div>

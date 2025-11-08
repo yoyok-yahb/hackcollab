@@ -15,6 +15,7 @@ export interface User {
     twitter?: string;
   };
   image: ImagePlaceholder;
+  email?: string;
 }
 
 export interface TeamOpening {
@@ -145,11 +146,46 @@ export const users: User[] = [
   }
 ];
 
-// Let's assume the current user is 'user1' (Alice) for context
-export const getCurrentUser = () => users[0];
+// Default user data, can be customized
+const defaultUser = { ...users[0] };
+
+// Function to save user data to local storage
+export const saveCurrentUser = (user: User) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  }
+};
+
+export const getCurrentUser = (): User => {
+    if (typeof window === 'undefined') {
+        return defaultUser;
+    }
+    try {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            const parsedUser = JSON.parse(savedUser);
+            // Ensure image is correctly loaded if it's just an id
+            if (typeof parsedUser.image === 'string') {
+                parsedUser.image = getUserImage(parsedUser.image);
+            }
+            return parsedUser;
+        }
+        // If no user is saved, save the default one and return it
+        saveCurrentUser(defaultUser);
+        return defaultUser;
+    } catch (error) {
+        console.error("Failed to get current user from localStorage", error);
+        return defaultUser;
+    }
+};
 
 // Function to get a user by their ID
-export const getUserById = (id: string) => users.find(user => user.id === id);
+export const getUserById = (id: string) => {
+    if (id === getCurrentUser().id) {
+        return getCurrentUser();
+    }
+    return users.find(user => user.id === id);
+}
 
 
 export const teamOpenings: TeamOpening[] = [
@@ -183,6 +219,18 @@ export const teamOpenings: TeamOpening[] = [
 ];
 
 let matches: Match[] = [];
+if (typeof window !== 'undefined') {
+    const savedMatches = localStorage.getItem('matches');
+    if (savedMatches) {
+        matches = JSON.parse(savedMatches).map((m: any) => ({...m, createdAt: new Date(m.createdAt)}));
+    }
+}
+
+const saveMatches = () => {
+     if (typeof window !== 'undefined') {
+        localStorage.setItem('matches', JSON.stringify(matches));
+    }
+}
 
 // Function to add a match
 export const addMatch = (match: Omit<Match, 'id' | 'createdAt'>) => {
@@ -192,12 +240,14 @@ export const addMatch = (match: Omit<Match, 'id' | 'createdAt'>) => {
     createdAt: new Date(),
   };
   matches.push(newMatch);
+  saveMatches();
   return newMatch;
 };
 
 // Function to remove a match by its ID
 export const removeMatch = (matchId: string) => {
   matches = matches.filter(match => match.id !== matchId);
+  saveMatches();
 };
 
 

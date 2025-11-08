@@ -2,9 +2,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { useState, useEffect } from 'react';
 import { Textarea } from '../ui/textarea';
+import type { User } from '@/lib/data';
 
 const suggestedInterests = [
   'Artificial Intelligence', 'Blockchain', 'Sustainability', 'Health & Wellness',
@@ -14,10 +14,18 @@ const suggestedInterests = [
 interface OnboardingStepProps {
   onNext: () => void;
   onBack: () => void;
+  data: Partial<User>;
+  setData: (data: Partial<User>) => void;
 }
 
-export function OnboardingStep5({ onNext, onBack }: OnboardingStepProps) {
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+export function OnboardingStep5({ onNext, onBack, data, setData }: OnboardingStepProps) {
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(data.preferences || []);
+  const [otherHobbies, setOtherHobbies] = useState('');
+
+  useEffect(() => {
+    const combinedInterests = [...new Set([...selectedInterests, ...otherHobbies.split(',').map(s => s.trim()).filter(Boolean)])];
+    setData({ preferences: combinedInterests });
+  }, [selectedInterests, otherHobbies, setData]);
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests(prev =>
@@ -46,7 +54,7 @@ export function OnboardingStep5({ onNext, onBack }: OnboardingStepProps) {
         </div>
         <div>
             <h3 className="text-sm font-medium mb-2">Other Hobbies (Optional)</h3>
-            <Textarea placeholder="List any other hobbies you have, separated by commas..." />
+            <Textarea placeholder="List any other hobbies you have, separated by commas..." value={otherHobbies} onChange={(e) => setOtherHobbies(e.target.value)} />
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">

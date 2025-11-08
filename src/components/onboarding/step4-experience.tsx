@@ -6,14 +6,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { PlusCircle, Trash2, Trophy, Upload } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { useState } from 'react';
+import type { User } from '@/lib/data';
 
 interface OnboardingStepProps {
   onNext: () => void;
   onBack: () => void;
+  data: Partial<User>;
+  setData: (data: Partial<User>) => void;
 }
 
-export function OnboardingStep4({ onNext, onBack }: OnboardingStepProps) {
-  const [experiences, setExperiences] = useState([{ name: '', description: '', certificate: null }]);
+export function OnboardingStep4({ onNext, onBack, data, setData }: OnboardingStepProps) {
+  const [experiences, setExperiences] = useState(data.experience ? [{ name: '', description: data.experience, certificate: null }] : [{ name: '', description: '', certificate: null }]);
 
   const handleAddExperience = () => {
     setExperiences([...experiences, { name: '', description: '', certificate: null }]);
@@ -22,6 +25,21 @@ export function OnboardingStep4({ onNext, onBack }: OnboardingStepProps) {
     const newExperiences = [...experiences];
     newExperiences.splice(index, 1);
     setExperiences(newExperiences);
+    updateMainData(newExperiences);
+  }
+
+  const handleExperienceChange = (index: number, field: string, value: string) => {
+    const newExperiences = [...experiences];
+    (newExperiences[index] as any)[field] = value;
+    setExperiences(newExperiences);
+    updateMainData(newExperiences);
+  };
+  
+  const updateMainData = (exps: typeof experiences) => {
+      // For now, let's just combine descriptions into one string.
+      // A more robust solution might change the User model.
+      const combinedExperience = exps.map(e => e.description).filter(Boolean).join('\n\n');
+      setData({ experience: combinedExperience });
   }
 
   return (
@@ -40,11 +58,11 @@ export function OnboardingStep4({ onNext, onBack }: OnboardingStepProps) {
                 )}
                 <div className="space-y-2">
                     <Label htmlFor={`hackathon-name-${index}`}>Hackathon Name</Label>
-                    <Input id={`hackathon-name-${index}`} placeholder="e.g., Hack The Planet 2023" />
+                    <Input id={`hackathon-name-${index}`} placeholder="e.g., Hack The Planet 2023" value={exp.name} onChange={(e) => handleExperienceChange(index, 'name', e.target.value)} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor={`hackathon-description-${index}`}>Your Project & Achievement</Label>
-                    <Textarea id={`hackathon-description-${index}`} placeholder="Briefly describe the project you built and any awards you won." />
+                    <Textarea id={`hackathon-description-${index}`} placeholder="Briefly describe the project you built and any awards you won." value={exp.description} onChange={(e) => handleExperienceChange(index, 'description', e.target.value)} />
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor={`certificate-${index}`}>Certificate (Optional)</Label>

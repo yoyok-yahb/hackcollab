@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Textarea } from '../ui/textarea';
 import type { User } from '@/lib/data';
 
@@ -22,10 +22,11 @@ export function OnboardingStep5({ onNext, onBack, data, setData }: OnboardingSte
   const [selectedInterests, setSelectedInterests] = useState<string[]>(data.preferences || []);
   const [otherHobbies, setOtherHobbies] = useState('');
 
-  useEffect(() => {
+  const handleNext = () => {
     const combinedInterests = [...new Set([...selectedInterests, ...otherHobbies.split(',').map(s => s.trim()).filter(Boolean)])];
     setData({ preferences: combinedInterests });
-  }, [selectedInterests, otherHobbies, setData]);
+    onNext();
+  };
 
   const toggleInterest = (interest: string) => {
     setSelectedInterests(prev =>
@@ -59,7 +60,7 @@ export function OnboardingStep5({ onNext, onBack, data, setData }: OnboardingSte
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={onBack}>Back</Button>
-        <Button onClick={onNext}>Finish Onboarding</Button>
+        <Button onClick={handleNext}>Finish Onboarding</Button>
       </CardFooter>
     </Card>
   );

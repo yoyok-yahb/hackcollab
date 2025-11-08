@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { removeMatch, getConversations, getTeamOpenings, User } from '@/lib/data';
+import { removeMatch, getConversations, getTeamOpenings, User, getCurrentUser } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, X, Sparkles, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,15 +19,18 @@ import { cn } from '@/lib/utils';
 export default function MatchesPage() {
   const isClient = useIsClient();
   const { toast } = useToast();
-  // Force re-render when a match is removed
   const [tick, setTick] = useState(0); 
   const [topMatches, setTopMatches] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
   if (!isClient) return null;
+  
+  const forceRerender = () => setTick(t => t + 1);
 
+  const currentUser = getCurrentUser();
   const conversations = getConversations();
-  const teamOpenings = getTeamOpenings();
+  const allOpenings = getTeamOpenings();
+
   const matchedUsers = conversations.map(c => ({...c.otherUser, teamOpeningTitle: c.teamOpeningTitle, teamOpeningId: c.teamOpeningId, matchId: c.matchId}));
 
   const groupedMatches = matchedUsers.reduce((acc, user) => {
@@ -39,6 +42,12 @@ export default function MatchesPage() {
     return acc;
   }, {} as Record<string, (User & {teamOpeningTitle: string, teamOpeningId: string, matchId: string})[]>);
 
+  // Get all unique opening titles from user's own openings and their matches
+  const userOpeningTitles = allOpenings.filter(o => o.authorId === currentUser.id).map(o => o.title);
+  const matchedOpeningTitles = conversations.map(c => c.teamOpeningTitle);
+  const allTabTitles = [...new Set([...userOpeningTitles, ...matchedOpeningTitles])];
+
+
   const handleRemoveMatch = (e: React.MouseEvent, matchId: string, userName: string) => {
     e.stopPropagation();
     e.preventDefault();
@@ -47,13 +56,13 @@ export default function MatchesPage() {
         title: "Match Removed",
         description: `You have removed your match with ${userName}.`,
     });
-    setTick(tick => tick + 1); // Trigger re-render
+    forceRerender();
   };
 
   const findBestMatch = async (openingTitle: string, users: (User & {teamOpeningId: string})[]) => {
     setIsLoading(prev => ({...prev, [openingTitle]: true}));
     try {
-        const opening = teamOpenings.find(o => o.title === openingTitle);
+        const opening = allOpenings.find(o => o.title === openingTitle);
         if (!opening) {
             toast({ variant: "destructive", title: "Error", description: "Could not find opening details." });
             return;
@@ -95,79 +104,93 @@ export default function MatchesPage() {
           <CardTitle>Your Matches</CardTitle>
         </CardHeader>
         <CardContent>
-          {matchedUsers.length > 0 ? (
-            <Tabs defaultValue={Object.keys(groupedMatches)[0] || ''} className="w-full">
+          {allTabTitles.length > 0 ? (
+            <Tabs defaultValue={allTabTitles[0] || ''} className="w-full">
               <TabsList className="grid w-full grid-cols-1 h-auto md:grid-cols-2 lg:grid-cols-3">
-                {Object.keys(groupedMatches).map((title) => (
+                {allTabTitles.map((title) => (
                   <TabsTrigger key={title} value={title}>{title}</TabsTrigger>
                 ))}
               </TabsList>
-              {Object.entries(groupedMatches).map(([title, users]) => (
+              {allTabTitles.map((title) => {
+                const users = groupedMatches[title] || [];
+                return (
                 <TabsContent key={title} value={title} className="mt-4">
-                  <div className="flex justify-end mb-4">
-                     <Button 
-                        onClick={() => findBestMatch(title, users)} 
-                        disabled={isLoading[title]}
-                        variant="outline"
-                    >
-                         {isLoading[title] ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4 text-primary" />}
-                        Find Best Match
-                     </Button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {users.map((user) => (
-                      <Card key={user.id} className={cn("overflow-hidden flex flex-col group relative hover:shadow-lg transition-shadow", { "border-primary border-2 shadow-lg": topMatches[title] === user.id })}>
-                        {topMatches[title] === user.id && (
-                           <Badge className="absolute top-2 left-2 z-10 bg-primary text-primary-foreground">Top Match</Badge>
-                        )}
-                        <Link href={`/profile/${user.id}`} className="flex flex-col flex-grow">
-                          <Button 
-                              variant="destructive" 
-                              size="icon" 
-                              className="absolute top-2 right-2 z-10 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={(e) => handleRemoveMatch(e, user.matchId, user.name)}
-                          >
-                              <X className="h-4 w-4" />
-                              <span className="sr-only">Remove Match</span>
-                          </Button>
-                          <div className="relative h-48 w-full">
-                            <Image
-                              src={user.image.imageUrl}
-                              alt={user.name}
-                              fill
-                              className="object-cover"
-                              data-ai-hint={user.image.imageHint}
-                            />
-                          </div>
-                          <CardContent className="p-4 flex flex-col flex-grow">
-                            <div className="flex items-center gap-4">
-                                <Avatar>
-                                    <AvatarImage src={user.image.imageUrl} alt={user.name} />
-                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <h3 className="font-semibold text-lg">{user.name}</h3>
-                                    <p className="text-sm text-muted-foreground">{user.skills.length > 0 ? user.skills[0] : 'No skills listed'}</p>
+                  {users.length > 0 ? (
+                    <>
+                      <div className="flex justify-end mb-4">
+                        <Button 
+                            onClick={() => findBestMatch(title, users)} 
+                            disabled={isLoading[title]}
+                            variant="outline"
+                        >
+                            {isLoading[title] ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4 text-primary" />}
+                            Find Best Match
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {users.map((user) => (
+                          <Card key={user.id} className={cn("overflow-hidden flex flex-col group relative hover:shadow-lg transition-shadow", { "border-primary border-2 shadow-lg": topMatches[title] === user.id })}>
+                            {topMatches[title] === user.id && (
+                              <Badge className="absolute top-2 left-2 z-10 bg-primary text-primary-foreground">Top Match</Badge>
+                            )}
+                            <Link href={`/profile/${user.id}`} className="flex flex-col flex-grow">
+                              <Button 
+                                  variant="destructive" 
+                                  size="icon" 
+                                  className="absolute top-2 right-2 z-10 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={(e) => handleRemoveMatch(e, user.matchId, user.name)}
+                              >
+                                  <X className="h-4 w-4" />
+                                  <span className="sr-only">Remove Match</span>
+                              </Button>
+                              <div className="relative h-48 w-full">
+                                <Image
+                                  src={user.image.imageUrl}
+                                  alt={user.name}
+                                  fill
+                                  className="object-cover"
+                                  data-ai-hint={user.image.imageHint}
+                                />
+                              </div>
+                              <CardContent className="p-4 flex flex-col flex-grow">
+                                <div className="flex items-center gap-4">
+                                    <Avatar>
+                                        <AvatarImage src={user.image.imageUrl} alt={user.name} />
+                                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">{user.name}</h3>
+                                        <p className="text-sm text-muted-foreground">{user.skills.length > 0 ? user.skills[0] : 'No skills listed'}</p>
+                                    </div>
                                 </div>
+                                <p className="mt-4 text-sm text-muted-foreground line-clamp-2 h-10 flex-grow">
+                                  {user.bio}
+                                </p>
+                              </CardContent>
+                            </Link>
+                            <div className="p-4 pt-0">
+                              <Button asChild className="w-full" onClick={(e) => e.stopPropagation()}>
+                                  <Link href={`/messages`}>
+                                    <MessageCircle className="mr-2 h-4 w-4" />
+                                    Send Message
+                                  </Link>
+                                </Button>
                             </div>
-                            <p className="mt-4 text-sm text-muted-foreground line-clamp-2 h-10 flex-grow">
-                              {user.bio}
-                            </p>
-                          </CardContent>
-                        </Link>
-                         <div className="p-4 pt-0">
-                           <Button asChild className="w-full" onClick={(e) => e.stopPropagation()}>
-                              <Link href={`/messages`}>
-                                <MessageCircle className="mr-2 h-4 w-4" />
-                                Send Message
-                              </Link>
-                            </Button>
-                         </div>
-                      </Card>
-                    ))}
-                  </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-20 text-center">
+                        <h3 className="text-xl font-semibold">No matches yet for "{title}"</h3>
+                        <p className="mt-2 text-muted-foreground">
+                            Head over to the Discover page to find your perfect teammate!
+                        </p>
+                    </div>
+                  )}
                 </TabsContent>
-              ))}
+                )
+            })}
             </Tabs>
           ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-20 text-center">

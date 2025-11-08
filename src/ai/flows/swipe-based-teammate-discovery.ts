@@ -10,10 +10,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { TeamOpening } from '@/lib/data';
 
 const FindPotentialTeammatesInputSchema = z.object({
   userProfile: z.string().describe('The current user profile data as a JSON string.'),
-  teamOpenings: z.string().describe('Available team openings data as a JSON string.'),
+  potentialTeammates: z.string().describe('A JSON string of potential teammates to rank.'),
+  teamOpening: z.string().optional().describe('The most recent team opening created by the user as a JSON string.'),
 });
 export type FindPotentialTeammatesInput = z.infer<typeof FindPotentialTeammatesInputSchema>;
 
@@ -36,17 +38,24 @@ const findPotentialTeammatesPrompt = ai.definePrompt({
   output: {schema: FindPotentialTeammatesOutputSchema},
   prompt: `You are an AI assistant designed to find potential teammates for hackathons.
 
-  Analyze the current user's profile and available team openings to identify the best matches.
+  Analyze the current user's profile, their latest team opening, and a list of potential teammates.
+  Your goal is to rank the potential teammates based on how well they fit the user's profile and the requirements of the team opening.
   Provide a match score (0-1) and a summary explaining why each potential teammate is a good fit.
 
   Current User Profile:
   {{userProfile}}
 
-  Available Team Openings:
-  {{teamOpenings}}
+  {{#if teamOpening}}
+  User's Latest Team Opening:
+  {{teamOpening}}
+  {{/if}}
+
+  Potential Teammates to evaluate:
+  {{potentialTeammates}}
 
   Format your response as a JSON array of potential teammates, including their userId, matchScore, and summary.
   Ensure the matchScore is a number between 0 and 1, and the summary is concise and informative.
+  The list should be sorted by matchScore in descending order.
   `,
 });
 

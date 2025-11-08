@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { Icons } from '@/components/icons';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -15,6 +15,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
 
   if (loading || !user) {
     return (
@@ -25,5 +30,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     )
   }
   
-  return <AppShell>{children}</AppShell>;
+  return <AppShell onLogout={handleLogout}>{children}</AppShell>;
 }

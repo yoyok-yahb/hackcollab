@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link, { type LinkProps } from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import {
   Briefcase,
   Home,
@@ -30,7 +30,6 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { getCurrentUser } from '@/lib/data';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
-import { useAuth } from '@/hooks/use-auth';
 
 const navItems = [
   { href: '/discover', icon: Sparkles, label: 'For You' },
@@ -39,17 +38,10 @@ const navItems = [
   { href: '/profile', icon: UserIcon, label: 'Profile' },
 ];
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) {
   const isMobile = useIsMobile();
   const pathname = usePathname();
-  const { logout } = useAuth();
-  const router = useRouter();
   const currentUser = getCurrentUser();
-
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  }
 
   const getPageTitle = () => {
     const item = navItems.find(item => pathname.startsWith(item.href));
@@ -209,7 +201,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
+                    <AlertDialogAction onClick={onLogout}>Log Out</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
       </AlertDialog>

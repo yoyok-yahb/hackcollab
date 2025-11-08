@@ -78,6 +78,7 @@ To get a local copy up and running, follow these simple steps.
 3.  **Set Up Environment Variables**
     The AI features in this app are powered by Genkit and Google AI. You'll need to configure your Google AI Studio API key.
 
+    - Visit [Google AI Studio](https://aistudio.google.com/app/apikey) to create a new API key.
     - Create a file named `.env` in the root of the project.
     - Add your API key to the `.env` file:
       ```

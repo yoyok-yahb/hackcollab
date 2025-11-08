@@ -1,3 +1,4 @@
+
 'use client';
 
 import { use } from 'react';
@@ -11,6 +12,7 @@ import { ArrowLeft, Github, Linkedin, Pencil, Twitter } from 'lucide-react';
 import Link from 'next/link';
 import { ProfileVerification } from '@/components/profile-verification';
 import { getCurrentUser } from '@/lib/data';
+import { RatingStars } from '@/components/rating-stars';
 
 function UserProfile({ user }: { user: User }) {
     return (
@@ -24,6 +26,7 @@ function UserProfile({ user }: { user: User }) {
             <div className="flex items-center justify-between">
               <CardTitle className="text-3xl">{user.name}, {user.age}</CardTitle>
             </div>
+            <RatingStars rating={user.rating.average} count={user.rating.count} className="mt-1" />
             <CardDescription className="mt-2 text-base">{user.bio}</CardDescription>
             <div className="mt-4 flex items-center gap-4">
                 {user.socialLinks.github && (
@@ -71,7 +74,7 @@ export default function ProfilePage({ params: paramsPromise }: { params: Promise
 
   if (!user) {
     return (
-        <div className="container mx-auto p-4 md:p-6 text-center">
+        <div className="container mx-auto p-4 md:p:6 text-center">
             <h1 className='text-2xl font-bold'>User not found</h1>
             <Button asChild variant="link">
                 <Link href="/discover">Back to Discover</Link>
@@ -84,7 +87,7 @@ export default function ProfilePage({ params: paramsPromise }: { params: Promise
   const isOwnProfile = user.id === currentUser.id;
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
+    <div className="container mx-auto p-4 md:p:6">
         <div className="mb-4">
             <Button asChild variant="ghost" className='pl-0'>
                 <Link href="/discover">
@@ -101,3 +104,5 @@ export default function ProfilePage({ params: paramsPromise }: { params: Promise
     </div>
   );
 }
+
+    

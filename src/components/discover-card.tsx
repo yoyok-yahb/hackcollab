@@ -1,3 +1,4 @@
+
 import type { User } from '@/lib/data';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -5,6 +6,7 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
+import { RatingStars } from './rating-stars';
 
 export function DiscoverCard({ user, isTopCard }: { user: User; isTopCard: boolean }) {
   return (
@@ -21,7 +23,7 @@ export function DiscoverCard({ user, isTopCard }: { user: User; isTopCard: boole
         />
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
           <h2 className="text-3xl font-bold">{user.name}, {user.age}</h2>
-          <p className="text-sm opacity-90">{user.experience}</p>
+          <RatingStars rating={user.rating.average} count={user.rating.count} showText={true} className="text-white" />
         </div>
       </div>
       <CardContent className="flex-grow p-4">
@@ -44,3 +46,5 @@ export function DiscoverCard({ user, isTopCard }: { user: User; isTopCard: boole
     </Card>
   );
 }
+
+    

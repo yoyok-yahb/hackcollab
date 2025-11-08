@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,6 +11,7 @@ import Link from 'next/link';
 import { useIsClient } from '@/hooks/use-is-client';
 import { Icons } from '@/components/icons';
 import { useEffect, useState } from 'react';
+import { RatingStars } from '@/components/rating-stars';
 
 export default function ProfilePage() {
   const isClient = useIsClient();
@@ -41,7 +43,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
+    <div className="container mx-auto p-4 md:p:6">
       <Card className="overflow-hidden">
         <CardHeader className="flex flex-col md:flex-row items-start gap-6">
           <Avatar className="h-24 w-24 border">
@@ -52,6 +54,7 @@ export default function ProfilePage() {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <CardTitle className="text-3xl">{user.name || "Your Name"}, {user.age || 'Age'}</CardTitle>
+                <RatingStars rating={user.rating.average} count={user.rating.count} className="mt-1" />
                 <CardDescription className="mt-2 text-base">{user.bio || 'Your bio will appear here. Add one by editing your profile!'}</CardDescription>
               </div>
               <Button asChild variant="outline" size="icon" className="flex-shrink-0 ml-4">
@@ -139,5 +142,7 @@ export default function ProfilePage() {
         </div>
     </div>
   );
+
+    
 
     

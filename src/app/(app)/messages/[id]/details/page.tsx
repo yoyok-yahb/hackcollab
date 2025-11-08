@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { use, useState } from 'react';
@@ -8,9 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CalendarClock, MapPin, Users as UsersIcon, X, ExternalLink } from 'lucide-react';
+import { ArrowLeft, CalendarClock, MapPin, Users as UsersIcon, X, ExternalLink, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { RateTeammateDialog } from '@/components/rate-teammate-dialog';
 
 export default function GroupChatDetailsPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const params = use(paramsPromise);
@@ -25,7 +27,7 @@ export default function GroupChatDetailsPage({ params: paramsPromise }: { params
 
   if (!opening) {
     return (
-      <div className="container mx-auto p-4 md:p-6 text-center">
+      <div className="container mx-auto p-4 md:p:6 text-center">
         <h1 className="text-2xl font-bold">Opening not found</h1>
         <Button asChild variant="link">
           <Link href="/messages">Back to Messages</Link>
@@ -49,7 +51,7 @@ export default function GroupChatDetailsPage({ params: paramsPromise }: { params
   const isMyOpening = opening.authorId === currentUser.id;
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
+    <div className="container mx-auto p-4 md:p:6">
       <div className="mb-4">
         <Button asChild variant="ghost" className="pl-0">
           <Link href={`/messages/${params.id}`}>
@@ -127,16 +129,24 @@ export default function GroupChatDetailsPage({ params: paramsPromise }: { params
                                     <p className="font-semibold">{member.name}</p>
                                     <p className="text-sm text-muted-foreground">{member.id === opening.authorId ? 'Team Lead' : 'Member'}</p>
                                 </div>
-                                {isMyOpening && member.id !== currentUser.id && (
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-7 w-7 text-muted-foreground opacity-0 group-hover:opacity-100"
-                                        onClick={() => handleRemoveMember(opening.id, member.id, member.name)}
-                                    >
-                                        <X className="h-4 w-4" />
-                                        <span className="sr-only">Remove member</span>
-                                    </Button>
+                                {member.id !== currentUser.id && (
+                                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <RateTeammateDialog teammate={member} onRated={forceRerender}>
+                                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
+                                                <Star className="h-4 w-4" />
+                                            </Button>
+                                        </RateTeammateDialog>
+                                        {isMyOpening && (
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="h-7 w-7 text-muted-foreground"
+                                                onClick={() => handleRemoveMember(opening.id, member.id, member.name)}
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
                                 )}
                             </li>
                         ))}
@@ -148,3 +158,5 @@ export default function GroupChatDetailsPage({ params: paramsPromise }: { params
     </div>
   );
 }
+
+    

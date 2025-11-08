@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { generateMatchSummary } from '@/ai/flows/ai-powered-matchmaking-summaries';
 import { cn } from '@/lib/utils';
+import { RatingStars } from '@/components/rating-stars';
 
 
 export default function MatchesPage() {
@@ -111,7 +112,7 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
+    <div className="container mx-auto p-4 md:p:6">
       <Card>
         <CardHeader>
           <CardTitle>Your Matches</CardTitle>
@@ -173,14 +174,14 @@ export default function MatchesPage() {
                                 />
                               </div>
                               <CardContent className="p-4 flex flex-col flex-grow">
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-start gap-4">
                                     <Avatar>
                                         <AvatarImage src={user.image.imageUrl} alt={user.name} />
                                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
-                                    <div>
+                                    <div className="flex-1">
                                         <h3 className="font-semibold text-lg">{user.name}</h3>
-                                        <p className="text-sm text-muted-foreground">{user.skills.length > 0 ? user.skills[0] : 'No skills listed'}</p>
+                                        <RatingStars rating={user.rating.average} count={user.rating.count} size={14} />
                                     </div>
                                 </div>
                                 <p className="mt-4 text-sm text-muted-foreground line-clamp-2 h-10 flex-grow">
@@ -235,3 +236,5 @@ export default function MatchesPage() {
     </div>
   );
 }
+
+    

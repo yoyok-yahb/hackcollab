@@ -23,6 +23,10 @@ export interface User {
   image: ImagePlaceholder;
   email?: string;
   projects: Project[];
+  rating: {
+    average: number;
+    count: number;
+  };
 }
 
 export type TaskStatus = 'Not Started Yet' | 'Ongoing' | 'Completed';
@@ -88,7 +92,8 @@ export let users: User[] = [
       linkedin: 'https://linkedin.com/in/alice',
     },
     image: getUserImage('user1'),
-    projects: [{ title: 'E-commerce Platform', description: 'Built a full-stack e-commerce site.', link: 'https://github.com/alice/ecom'}]
+    projects: [{ title: 'E-commerce Platform', description: 'Built a full-stack e-commerce site.', link: 'https://github.com/alice/ecom'}],
+    rating: { average: 4.8, count: 15 }
   },
   {
     id: 'user2',
@@ -101,7 +106,8 @@ export let users: User[] = [
       linkedin: 'https://linkedin.com/in/bob',
     },
     image: getUserImage('user2'),
-    projects: []
+    projects: [],
+    rating: { average: 4.5, count: 8 }
   },
   {
     id: 'user3',
@@ -114,7 +120,8 @@ export let users: User[] = [
       github: 'https://github.com/charlie',
     },
     image: getUserImage('user3'),
-    projects: []
+    projects: [],
+    rating: { average: 4.9, count: 22 }
   },
   {
     id: 'user4',
@@ -128,7 +135,8 @@ export let users: User[] = [
       twitter: 'https://twitter.com/diana'
     },
     image: getUserImage('user4'),
-    projects: []
+    projects: [],
+    rating: { average: 4.7, count: 12 }
   },
   {
     id: 'user5',
@@ -141,7 +149,8 @@ export let users: User[] = [
         github: 'https://github.com/ethan'
     },
     image: getUserImage('user5'),
-    projects: []
+    projects: [],
+    rating: { average: 4.2, count: 5 }
   },
    {
     id: 'user6',
@@ -155,7 +164,8 @@ export let users: User[] = [
       linkedin: 'https://linkedin.com/in/fiona',
     },
     image: getUserImage('user6'),
-    projects: []
+    projects: [],
+    rating: { average: 4.6, count: 9 }
   },
   {
     id: 'user7',
@@ -169,7 +179,8 @@ export let users: User[] = [
         twitter: 'https://twitter.com/george'
     },
     image: getUserImage('user7'),
-    projects: []
+    projects: [],
+    rating: { average: 4.9, count: 30 }
   }
 ];
 
@@ -198,7 +209,8 @@ const defaultUser: User = {
     experience: '',
     socialLinks: { github: '', linkedin: '', twitter: '' },
     image: getUserImage('user1'),
-    projects: []
+    projects: [],
+    rating: { average: 0, count: 0 },
 };
 
 // Function to save user data to local storage
@@ -240,6 +252,9 @@ export const getCurrentUser = (): User => {
             if (!parsedUser.projects) {
                 parsedUser.projects = [];
             }
+            if (!parsedUser.rating) {
+                parsedUser.rating = { average: 0, count: 0 };
+            }
             return parsedUser;
         }
         // If no user is saved, save the default one and return it
@@ -254,12 +269,37 @@ export const getCurrentUser = (): User => {
 // Function to get a user by their ID
 export const getUserById = (id: string) => {
     if (id === 'system') {
-      return { id: 'system', name: 'System', image: { imageUrl: '', imageHint: '', id: '', description: '' }, age: 0, bio: '', skills: [], experience: '', socialLinks: {}, projects: [] };
+      return { id: 'system', name: 'System', image: { imageUrl: '', imageHint: '', id: '', description: '' }, age: 0, bio: '', skills: [], experience: '', socialLinks: {}, projects: [], rating: { average: 0, count: 0 } };
     }
     if (getCurrentUser().id === id) {
         return getCurrentUser();
     }
     return users.find(user => user.id === id);
+}
+
+export const rateUser = (userId: string, rating: number) => {
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex !== -1) {
+        const user = users[userIndex];
+        const currentTotalRating = user.rating.average * user.rating.count;
+        const newCount = user.rating.count + 1;
+        const newAverage = (currentTotalRating + rating) / newCount;
+        
+        users[userIndex].rating = {
+            average: parseFloat(newAverage.toFixed(1)),
+            count: newCount,
+        };
+
+        // If the rated user is the current user, update localStorage
+        const currentUser = getCurrentUser();
+        if (currentUser.id === userId) {
+            saveCurrentUser(users[userIndex]);
+        }
+
+        saveUsers();
+        return users[userIndex];
+    }
+    return null;
 }
 
 
@@ -677,5 +717,7 @@ export const updateTask = (updatedTask: Task): Task => {
     saveTeamOpenings(openings);
     return updatedTask;
 }
+
+    
 
     

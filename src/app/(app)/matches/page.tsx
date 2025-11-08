@@ -33,7 +33,9 @@ export default function MatchesPage() {
     return acc;
   }, {} as Record<string, typeof matchedUsers>);
 
-  const handleRemoveMatch = (matchId: string, userName: string) => {
+  const handleRemoveMatch = (e: React.MouseEvent, matchId: string, userName: string) => {
+    e.stopPropagation();
+    e.preventDefault();
     removeMatch(matchId);
     toast({
         title: "Match Removed",
@@ -60,46 +62,50 @@ export default function MatchesPage() {
                 <TabsContent key={title} value={title}>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
                     {users.map((user) => (
-                      <Card key={user.id} className="overflow-hidden flex flex-col group relative">
+                      <Card key={user.id} className="overflow-hidden flex flex-col group relative hover:shadow-lg transition-shadow">
+                        <Link href={`/profile/${user.id}`} className="flex flex-col flex-grow">
                           <Button 
                               variant="destructive" 
                               size="icon" 
                               className="absolute top-2 right-2 z-10 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() => handleRemoveMatch(user.matchId, user.name)}
+                              onClick={(e) => handleRemoveMatch(e, user.matchId, user.name)}
                           >
                               <X className="h-4 w-4" />
                               <span className="sr-only">Remove Match</span>
                           </Button>
-                        <div className="relative h-48 w-full">
-                          <Image
-                            src={user.image.imageUrl}
-                            alt={user.name}
-                            fill
-                            className="object-cover"
-                            data-ai-hint={user.image.imageHint}
-                          />
-                        </div>
-                        <CardContent className="p-4 flex flex-col flex-grow">
-                          <div className="flex items-center gap-4">
-                              <Avatar>
-                                  <AvatarImage src={user.image.imageUrl} alt={user.name} />
-                                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                  <h3 className="font-semibold text-lg">{user.name}</h3>
-                                  <p className="text-sm text-muted-foreground">{user.skills[0]}</p>
-                              </div>
+                          <div className="relative h-48 w-full">
+                            <Image
+                              src={user.image.imageUrl}
+                              alt={user.name}
+                              fill
+                              className="object-cover"
+                              data-ai-hint={user.image.imageHint}
+                            />
                           </div>
-                          <p className="mt-4 text-sm text-muted-foreground line-clamp-2 h-10 flex-grow">
-                            {user.bio}
-                          </p>
-                          <Button asChild className="mt-4 w-full">
-                            <Link href={`/messages`}>
-                              <MessageCircle className="mr-2 h-4 w-4" />
-                              Send Message
-                            </Link>
-                          </Button>
-                        </CardContent>
+                          <CardContent className="p-4 flex flex-col flex-grow">
+                            <div className="flex items-center gap-4">
+                                <Avatar>
+                                    <AvatarImage src={user.image.imageUrl} alt={user.name} />
+                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <h3 className="font-semibold text-lg">{user.name}</h3>
+                                    <p className="text-sm text-muted-foreground">{user.skills[0]}</p>
+                                </div>
+                            </div>
+                            <p className="mt-4 text-sm text-muted-foreground line-clamp-2 h-10 flex-grow">
+                              {user.bio}
+                            </p>
+                          </CardContent>
+                        </Link>
+                         <div className="p-4 pt-0">
+                           <Button asChild className="w-full" onClick={(e) => e.stopPropagation()}>
+                              <Link href={`/messages`}>
+                                <MessageCircle className="mr-2 h-4 w-4" />
+                                Send Message
+                              </Link>
+                            </Button>
+                         </div>
                       </Card>
                     ))}
                   </div>

@@ -191,7 +191,7 @@ if (typeof window !== 'undefined') {
     if (savedUsers) {
         users = JSON.parse(savedUsers).map((user: any) => ({
             ...user,
-            rating: user.rating || { average: 0, count: 0 } // Ensure rating object exists
+            rating: user.rating || { average: 4.5, count: 10 }
         }));
     } else {
         users = initialUsers;
@@ -724,3 +724,5 @@ export const updateTask = (updatedTask: Task): Task => {
     saveTeamOpenings(openings);
     return updatedTask;
 }
+
+    

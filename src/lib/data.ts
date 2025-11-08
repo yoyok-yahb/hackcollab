@@ -204,19 +204,20 @@ const defaultUser: User = {
 export const saveCurrentUser = (user: User) => {
   if (typeof window !== 'undefined') {
     const userToSave = { ...user };
+    const oldUserData = getCurrentUser(); // Get the state of user data before the change
 
-    // Prevent storing large base64 strings in localStorage
-    if (userToSave.image?.imageUrl?.startsWith('data:image')) {
-      // In a real app, you would upload this to a storage service and get a URL.
-      // For this mock app, we'll assign a new random placeholder to show a change
-      // without exceeding localStorage quota.
+    // Prevent storing large base64 strings in localStorage by assigning a new placeholder
+    const imageChanged = oldUserData.image?.imageUrl !== userToSave.image?.imageUrl;
+
+    if (imageChanged && userToSave.image?.imageUrl?.startsWith('data:image')) {
       const userImages = PlaceHolderImages.filter(p => p.imageHint.includes('person') || p.imageHint.includes('portrait'));
-      const existingImageIndex = userImages.findIndex(img => img.imageUrl === userToSave.image.imageUrl);
-      let newImageIndex = Math.floor(Math.random() * userImages.length);
-      // Ensure we get a different image
-      while (newImageIndex === existingImageIndex) {
+      const existingImageIndex = userImages.findIndex(img => img.imageUrl === oldUserData.image.imageUrl);
+      
+      let newImageIndex;
+      do {
         newImageIndex = Math.floor(Math.random() * userImages.length);
-      }
+      } while (newImageIndex === existingImageIndex && userImages.length > 1); // Ensure new image is different if possible
+
       userToSave.image = userImages[newImageIndex] || getUserImage('user1');
     }
 
@@ -647,3 +648,4 @@ export const updateTask = (updatedTask: Task): Task => {
     saveTeamOpenings(openings);
     return updatedTask;
 }
+

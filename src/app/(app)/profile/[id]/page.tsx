@@ -52,14 +52,6 @@ function UserProfile({ user }: { user: User }) {
                     ))}
                 </div>
             </div>
-             <div>
-                <h3 className="font-semibold text-lg mb-2">Hackathon Preferences</h3>
-                <div className="flex flex-wrap gap-2">
-                    {user.preferences.map(pref => (
-                        <Badge key={pref} variant="outline" className="text-base py-1 px-3">{pref}</Badge>
-                    ))}
-                </div>
-            </div>
              <div className="md:col-span-2">
                 <h3 className="font-semibold text-lg mb-2">Experience</h3>
                 <p className="text-muted-foreground">{user.experience}</p>

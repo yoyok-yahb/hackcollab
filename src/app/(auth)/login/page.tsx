@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Icons } from '@/components/icons';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
+import { ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -28,16 +29,14 @@ export default function LoginPage() {
             </div>
           <CardTitle>Welcome to Hackathon TeamUp</CardTitle>
           <CardDescription>
-            Sign in to find your dream team.
+            Find your dream team and build something amazing together.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
-             <Button onClick={handleLogin} className="w-full">
-                Continue with Google
-            </Button>
-            <Button onClick={handleLogin} variant="secondary" className="w-full">
-                Continue with GitHub
+             <Button onClick={handleLogin} className="w-full" size="lg">
+                Get Started
+                <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
           <p className="mt-4 px-8 text-center text-xs text-muted-foreground">

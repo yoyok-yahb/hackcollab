@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useIsClient } from '@/hooks/use-is-client';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function MatchesPage() {
   const isClient = useIsClient();
@@ -22,6 +23,15 @@ export default function MatchesPage() {
 
   const conversations = getConversations();
   const matchedUsers = conversations.map(c => ({...c.otherUser, teamOpeningTitle: c.teamOpeningTitle, matchId: c.matchId}));
+
+  const groupedMatches = matchedUsers.reduce((acc, user) => {
+    const title = user.teamOpeningTitle;
+    if (!acc[title]) {
+      acc[title] = [];
+    }
+    acc[title].push(user);
+    return acc;
+  }, {} as Record<string, typeof matchedUsers>);
 
   const handleRemoveMatch = (matchId: string, userName: string) => {
     removeMatch(matchId);
@@ -40,54 +50,62 @@ export default function MatchesPage() {
         </CardHeader>
         <CardContent>
           {matchedUsers.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {matchedUsers.map((user) => (
-                <Card key={user.id} className="overflow-hidden flex flex-col group relative">
-                    <Button 
-                        variant="destructive" 
-                        size="icon" 
-                        className="absolute top-2 right-2 z-10 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handleRemoveMatch(user.matchId, user.name)}
-                    >
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Remove Match</span>
-                    </Button>
-                  <div className="relative h-48 w-full">
-                    <Image
-                      src={user.image.imageUrl}
-                      alt={user.name}
-                      fill
-                      className="object-cover"
-                      data-ai-hint={user.image.imageHint}
-                    />
-                  </div>
-                  <CardContent className="p-4 flex flex-col flex-grow">
-                    <div className="flex items-center gap-4">
-                        <Avatar>
-                            <AvatarImage src={user.image.imageUrl} alt={user.name} />
-                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <h3 className="font-semibold text-lg">{user.name}</h3>
-                            <p className="text-sm text-muted-foreground">{user.skills[0]}</p>
+            <Tabs defaultValue={Object.keys(groupedMatches)[0]} className="w-full">
+              <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {Object.keys(groupedMatches).map((title) => (
+                  <TabsTrigger key={title} value={title}>{title}</TabsTrigger>
+                ))}
+              </TabsList>
+              {Object.entries(groupedMatches).map(([title, users]) => (
+                <TabsContent key={title} value={title}>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4">
+                    {users.map((user) => (
+                      <Card key={user.id} className="overflow-hidden flex flex-col group relative">
+                          <Button 
+                              variant="destructive" 
+                              size="icon" 
+                              className="absolute top-2 right-2 z-10 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => handleRemoveMatch(user.matchId, user.name)}
+                          >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove Match</span>
+                          </Button>
+                        <div className="relative h-48 w-full">
+                          <Image
+                            src={user.image.imageUrl}
+                            alt={user.name}
+                            fill
+                            className="object-cover"
+                            data-ai-hint={user.image.imageHint}
+                          />
                         </div>
-                    </div>
-                     <div className="mt-2">
-                        <Badge variant="secondary">Matched for: {user.teamOpeningTitle}</Badge>
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10 flex-grow">
-                      {user.bio}
-                    </p>
-                    <Button asChild className="mt-4 w-full">
-                      <Link href={`/messages`}>
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        Send Message
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+                        <CardContent className="p-4 flex flex-col flex-grow">
+                          <div className="flex items-center gap-4">
+                              <Avatar>
+                                  <AvatarImage src={user.image.imageUrl} alt={user.name} />
+                                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                  <h3 className="font-semibold text-lg">{user.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{user.skills[0]}</p>
+                              </div>
+                          </div>
+                          <p className="mt-4 text-sm text-muted-foreground line-clamp-2 h-10 flex-grow">
+                            {user.bio}
+                          </p>
+                          <Button asChild className="mt-4 w-full">
+                            <Link href={`/messages`}>
+                              <MessageCircle className="mr-2 h-4 w-4" />
+                              Send Message
+                            </Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
               ))}
-            </div>
+            </Tabs>
           ) : (
             <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-20 text-center">
                 <h3 className="text-xl font-semibold">No matches yet</h3>

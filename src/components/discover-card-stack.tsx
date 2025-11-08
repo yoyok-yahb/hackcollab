@@ -2,18 +2,40 @@
 
 import { useState } from 'react';
 import type { User } from '@/lib/data';
+import { addMatch, getCurrentUser, teamOpenings } from '@/lib/data';
 import { DiscoverCard } from './discover-card';
 import { Button } from './ui/button';
 import { Heart, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useToast } from '@/hooks/use-toast';
 
 export function DiscoverCardStack({ users }: { users: User[] }) {
   const [stack, setStack] = useState(users);
   const [isAnimating, setIsAnimating] = useState(false);
+  const { toast } = useToast();
+  const currentUser = getCurrentUser();
 
-  const handleSwipe = () => {
+  const handleSwipe = (liked: boolean, likedUser: User) => {
     if (isAnimating) return;
     setIsAnimating(true);
+
+    if (liked) {
+      // In a real app, this might be more complex, e.g. matching for a specific opening
+      // For now, we'll just pick the first team opening as an example
+      const teamOpening = teamOpenings[0];
+
+      addMatch({
+        userId1: currentUser.id,
+        userId2: likedUser.id,
+        teamOpeningId: teamOpening.id,
+      });
+
+      toast({
+        title: 'New Match!',
+        description: `You matched with ${likedUser.name} for "${teamOpening.title}"`,
+      });
+    }
+
     setTimeout(() => {
       setStack((prev) => prev.slice(1));
       setIsAnimating(false);
@@ -21,13 +43,15 @@ export function DiscoverCardStack({ users }: { users: User[] }) {
   };
 
   const handlePass = () => {
-    // In a real app, you'd handle the pass logic here
-    handleSwipe();
+    if (stack.length > 0) {
+      handleSwipe(false, stack[0]);
+    }
   };
 
   const handleLike = () => {
-    // In a real app, you'd handle the like logic here
-    handleSwipe();
+    if (stack.length > 0) {
+      handleSwipe(true, stack[0]);
+    }
   };
 
   if (stack.length === 0) {

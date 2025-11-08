@@ -1,10 +1,27 @@
+'use client'
+
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getConversations } from '@/lib/data';
+import { useIsClient } from '@/hooks/use-is-client';
 
 export default function MessagesPage() {
+  const isClient = useIsClient();
+
+  if (!isClient) {
+    return (
+        <div className="h-full flex flex-col">
+            <div className="p-4 md:p-6">
+                <h1 className="text-2xl font-bold">Messages</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                <h3 className="text-xl font-semibold">Loading messages...</h3>
+            </div>
+        </div>
+    );
+  }
   const conversations = getConversations();
 
   return (

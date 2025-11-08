@@ -31,6 +31,7 @@ export interface Match {
   id: string;
   userId1: string;
   userId2: string;
+  teamOpeningId: string;
   createdAt: Date;
 }
 
@@ -178,33 +179,39 @@ export const teamOpenings: TeamOpening[] = [
   },
 ];
 
-export const matches: Match[] = [
-    {
-        id: 'match1',
-        userId1: 'user1',
-        userId2: 'user2',
-        createdAt: new Date('2024-07-20T11:00:00Z'),
-    },
-    {
-        id: 'match2',
-        userId1: 'user1',
-        userId2: 'user4',
-        createdAt: new Date('2024-07-19T18:00:00Z'),
-    }
-];
+let matches: Match[] = [];
+
+// Function to add a match
+export const addMatch = (match: Omit<Match, 'id' | 'createdAt'>) => {
+  const newMatch: Match = {
+    ...match,
+    id: `match${matches.length + 1}`,
+    createdAt: new Date(),
+  };
+  matches.push(newMatch);
+  return newMatch;
+};
+
+// Function to get all matches
+export const getMatches = () => {
+    return matches;
+}
 
 
 export const getConversations = () => {
     const currentUser = getCurrentUser();
-    return matches.filter(m => m.userId1 === currentUser.id || m.userId2 === currentUser.id)
+    const currentMatches = getMatches();
+    return currentMatches.filter(m => m.userId1 === currentUser.id || m.userId2 === currentUser.id)
         .map(match => {
             const otherUserId = match.userId1 === currentUser.id ? match.userId2 : match.userId1;
             const otherUser = users.find(u => u.id === otherUserId)!;
+            const teamOpening = teamOpenings.find(t => t.id === match.teamOpeningId);
             return {
                 conversationId: `conv-${match.id}`,
                 otherUser,
-                lastMessage: `Sounds good! Let's chat more.`,
-                lastMessageAt: new Date(match.createdAt.getTime() + 1000 * 60 * 5)
+                teamOpeningTitle: teamOpening?.title || 'A Project',
+                lastMessage: `You matched for ${teamOpening?.title || 'a project'}.`,
+                lastMessageAt: match.createdAt
             }
         })
         .sort((a,b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime())

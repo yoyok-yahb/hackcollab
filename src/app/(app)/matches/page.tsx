@@ -1,14 +1,24 @@
+'use client'
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getConversations, User } from '@/lib/data';
+import { getConversations } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { MessageCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { useIsClient } from '@/hooks/use-is-client';
 
 export default function MatchesPage() {
+  // We use this hook to prevent a hydration mismatch.
+  // The matches are updated on the client, so we only want to render
+  // the list of matches on the client.
+  const isClient = useIsClient();
+  if (!isClient) return null;
+
   const conversations = getConversations();
-  const matchedUsers = conversations.map(c => c.otherUser);
+  const matchedUsers = conversations.map(c => ({...c.otherUser, teamOpeningTitle: c.teamOpeningTitle}));
 
   return (
     <div className="container mx-auto p-4 md:p-6">
@@ -20,7 +30,7 @@ export default function MatchesPage() {
           {matchedUsers.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {matchedUsers.map((user) => (
-                <Card key={user.id} className="overflow-hidden">
+                <Card key={user.id} className="overflow-hidden flex flex-col">
                   <div className="relative h-48 w-full">
                     <Image
                       src={user.image.imageUrl}
@@ -30,7 +40,7 @@ export default function MatchesPage() {
                       data-ai-hint={user.image.imageHint}
                     />
                   </div>
-                  <CardContent className="p-4">
+                  <CardContent className="p-4 flex flex-col flex-grow">
                     <div className="flex items-center gap-4">
                         <Avatar>
                             <AvatarImage src={user.image.imageUrl} alt={user.name} />
@@ -41,7 +51,10 @@ export default function MatchesPage() {
                             <p className="text-sm text-muted-foreground">{user.skills[0]}</p>
                         </div>
                     </div>
-                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10">
+                     <div className="mt-2">
+                        <Badge variant="secondary">Matched for: {user.teamOpeningTitle}</Badge>
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground line-clamp-2 h-10 flex-grow">
                       {user.bio}
                     </p>
                     <Button asChild className="mt-4 w-full">

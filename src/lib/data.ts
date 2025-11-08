@@ -14,7 +14,6 @@ export interface User {
   bio: string;
   skills: string[];
   experience: string;
-  preferences: string[];
   socialLinks: {
     github?: string;
     linkedin?: string;
@@ -63,7 +62,6 @@ export const users: User[] = [
     bio: 'Full-stack developer with a passion for creating beautiful and functional web applications. Coffee enthusiast and dog lover.',
     skills: ['React', 'Node.js', 'TypeScript', 'GraphQL', 'Firebase'],
     experience: '5+ years in software development',
-    preferences: ['Web Development', 'AI/ML', 'Social Good'],
     socialLinks: {
       github: 'https://github.com/alice',
       linkedin: 'https://linkedin.com/in/alice',
@@ -78,7 +76,6 @@ export const users: User[] = [
     bio: 'UX/UI designer focused on creating intuitive and user-centered designs. Loves to bring ideas to life with Figma.',
     skills: ['Figma', 'Sketch', 'Adobe XD', 'User Research', 'Prototyping'],
     experience: '3 years in design',
-    preferences: ['Mobile App Design', 'SaaS', 'Fintech'],
     socialLinks: {
       linkedin: 'https://linkedin.com/in/bob',
     },
@@ -92,7 +89,6 @@ export const users: User[] = [
     bio: 'Data scientist and Python expert. Fascinated by machine learning and its potential to solve real-world problems.',
     skills: ['Python', 'TensorFlow', 'PyTorch', 'scikit-learn', 'Pandas'],
     experience: '7 years in data science',
-    preferences: ['AI/ML', 'Big Data', 'Healthtech'],
     socialLinks: {
       github: 'https://github.com/charlie',
     },
@@ -106,7 +102,6 @@ export const users: User[] = [
     bio: 'Product Manager with a knack for strategy and execution. I thrive in fast-paced environments and love building products users love.',
     skills: ['Product Strategy', 'Agile', 'Roadmapping', 'Jira'],
     experience: '6 years in product management',
-    preferences: ['E-commerce', 'Social Media', 'Productivity Tools'],
     socialLinks: {
       linkedin: 'https://linkedin.com/in/diana',
       twitter: 'https://twitter.com/diana'
@@ -121,7 +116,6 @@ export const users: User[] = [
     bio: 'Aspiring mobile developer, currently mastering Swift and Kotlin. Eager to learn and contribute to an exciting project.',
     skills: ['Swift', 'Kotlin', 'iOS', 'Android', 'Git'],
     experience: '1 year of personal projects',
-    preferences: ['Mobile App Design', 'Gaming', 'Social Media'],
     socialLinks: {
         github: 'https://github.com/ethan'
     },
@@ -135,7 +129,6 @@ export const users: User[] = [
     bio: 'DevOps engineer who loves automating all the things. Let\'s build a solid and scalable infrastructure.',
     skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD'],
     experience: '4 years in DevOps',
-    preferences: ['Cloud Infrastructure', 'Fintech', 'SaaS'],
     socialLinks: {
       github: 'https://github.com/fiona',
       linkedin: 'https://linkedin.com/in/fiona',
@@ -150,7 +143,6 @@ export const users: User[] = [
     bio: 'Frontend wizard with expertise in creating pixel-perfect, performant user interfaces.',
     skills: ['Vue.js', 'Next.js', 'CSS-in-JS', 'Performance Optimization'],
     experience: '10+ years in frontend development',
-    preferences: ['Web Development', 'E-commerce', 'Design Systems'],
     socialLinks: {
         github: 'https://github.com/george',
         twitter: 'https://twitter.com/george'
@@ -169,7 +161,6 @@ const defaultUser: User = {
     email: '',
     skills: [],
     experience: '',
-    preferences: [],
     socialLinks: { github: '', linkedin: '', twitter: '' },
     image: getUserImage('user1'),
     projects: []

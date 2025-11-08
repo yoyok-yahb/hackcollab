@@ -4,7 +4,6 @@ import { OnboardingStep1 } from '@/components/onboarding/step1-personal-details'
 import { OnboardingStep2 } from '@/components/onboarding/step2-skills';
 import { OnboardingStep3 } from '@/components/onboarding/step3-projects';
 import { OnboardingStep4 } from '@/components/onboarding/step4-experience';
-import { OnboardingStep5 } from '@/components/onboarding/step5-interests';
 import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,6 @@ const steps = [
     { component: OnboardingStep2, title: "Your Skills" },
     { component: OnboardingStep3, title: "Your Projects" },
     { component: OnboardingStep4, title: "Your Experience" },
-    { component: OnboardingStep5, title: "Interests & Hobbies" },
 ];
 
 export default function EditProfilePage() {

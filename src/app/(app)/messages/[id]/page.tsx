@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getCurrentUser, getConversations, User, Message, addMessage, getMessagesForConversation, getUserById, getTeamOpenings, TeamOpening } from '@/lib/data';
-import { ArrowLeft, Loader2, Send, ShieldAlert, Sparkles, Users } from 'lucide-react';
+import { ArrowLeft, Loader2, Send, ShieldAlert, Sparkles, Users, Info } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -132,6 +132,7 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
   }
 
   const getSender = (senderId: string): User | undefined => {
+    if (senderId === 'system') return { id: 'system', name: 'System', image: { imageUrl: '', imageHint: '', id: '', description: '' }, age: 0, bio: '', skills: [], experience: '', socialLinks: {}, projects: [] };
     if (senderId === currentUser.id) return currentUser;
     return getUserById(senderId);
   }
@@ -164,6 +165,14 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
           <p className="font-semibold">{chatTitle}</p>
           <p className="text-xs text-muted-foreground">{getParticipantCount()}</p>
         </div>
+         {isGroupChat && (
+            <Button asChild variant="ghost" size="icon">
+                <Link href={`/messages/${params.id}/details`}>
+                    <Info className="h-5 w-5" />
+                    <span className="sr-only">Group Details</span>
+                </Link>
+            </Button>
+        )}
       </header>
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">

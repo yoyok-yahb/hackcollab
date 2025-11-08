@@ -52,10 +52,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const getPageTitle = () => {
-    if (pathname.startsWith('/matches')) return 'Your Matches';
     const item = navItems.find(item => pathname.startsWith(item.href));
     if (pathname.startsWith('/profile/')) return 'Profile';
     if (pathname.startsWith('/messages/')) return 'Messages';
+    if (pathname.startsWith('/matches')) return 'Your Matches';
     return item?.label || 'Hackathon TeamUp';
   }
 
@@ -69,10 +69,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <div className="flex items-center gap-2">
              {pathname === '/discover' && (
-                <Button variant="ghost" size="icon" asChild>
+                <Button variant="outline" size="sm" asChild>
                   <Link href="/matches">
-                    <Users className="h-6 w-6" />
-                    <span className="sr-only">Your Matches</span>
+                    <Users className="h-4 w-4 mr-2" />
+                    Your Matches
                   </Link>
                 </Button>
               )}
@@ -159,23 +159,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-col">
         <header className="flex h-14 items-center justify-between gap-4 border-b bg-background px-4 lg:px-6">
             <h1 className="text-xl font-semibold capitalize">{getPageTitle()}</h1>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               {pathname === '/discover' && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                       <Button variant="ghost" size="icon" asChild>
-                          <Link href="/matches">
-                            <Users className="h-5 w-5" />
-                            <span className="sr-only">Your Matches</span>
-                          </Link>
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Your Matches</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Button variant="outline" asChild>
+                  <Link href="/matches">
+                    <Users className="mr-2 h-5 w-5" />
+                    Your Matches
+                  </Link>
+                </Button>
               )}
               <DropdownMenu>
                   <DropdownMenuTrigger asChild>

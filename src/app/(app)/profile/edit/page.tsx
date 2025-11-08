@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { getCurrentUser, saveCurrentUser, User } from '@/lib/data';
 
 const steps = [
     { component: OnboardingStep1, title: "Personal Details" },
@@ -21,13 +22,19 @@ const steps = [
 
 export default function EditProfilePage() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [profileData, setProfileData] = useState<Partial<User>>(() => getCurrentUser());
   const router = useRouter();
+
+  const updateProfileData = (data: Partial<User>) => {
+    setProfileData(prev => ({...prev, ...data}));
+  };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       // Finish editing
+      saveCurrentUser(profileData as User);
       router.push('/profile');
     }
   };
@@ -56,7 +63,7 @@ export default function EditProfilePage() {
                 <p className="text-muted-foreground">Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}</p>
              </div>
             <Progress value={((currentStep + 1) / steps.length) * 100} className="mb-8 w-full" />
-            <CurrentStepComponent onNext={handleNext} onBack={handleBack} />
+            <CurrentStepComponent onNext={handleNext} onBack={handleBack} data={profileData} setData={updateProfileData} />
         </div>
     </div>
   );

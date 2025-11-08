@@ -6,16 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, teamOpenings, users, addMatch } from '@/lib/data';
 import { formatDistanceToNow } from 'date-fns';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Search } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
 
 export default function OpeningsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   // This state will be used to force a re-render when openings are updated
   const [openingsVersion, setOpeningsVersion] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const currentUser = getCurrentUser();
 
@@ -49,66 +51,100 @@ export default function OpeningsPage() {
     });
   }
 
+  const filteredOpenings = teamOpenings.filter(opening => {
+    const searchLower = searchTerm.toLowerCase();
+    const author = users.find(u => u.id === opening.authorId);
+
+    return (
+        opening.title.toLowerCase().includes(searchLower) ||
+        opening.projectIdea.toLowerCase().includes(searchLower) ||
+        (author && author.name.toLowerCase().includes(searchLower)) ||
+        opening.requiredRoles.some(role => role.toLowerCase().includes(searchLower)) ||
+        opening.techStack.some(tech => tech.toLowerCase().includes(searchLower))
+    );
+  });
+
   return (
     <div className="container mx-auto p-4 md:p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold">Team Openings</h1>
-        <CreateOpeningDialog 
-          open={isDialogOpen} 
-          onOpenChange={setIsDialogOpen}
-          onOpeningCreated={handleOpeningCreated}
-        >
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <PlusCircle className="mr-2 h-5 w-5" />
-            Post an Opening
-          </Button>
-        </CreateOpeningDialog>
+        <div className="flex w-full md:w-auto items-center gap-2">
+           <div className="relative w-full md:w-64">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+             <Input 
+                type="search"
+                placeholder="Search openings..."
+                className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+             />
+           </div>
+           <CreateOpeningDialog 
+            open={isDialogOpen} 
+            onOpenChange={setIsDialogOpen}
+            onOpeningCreated={handleOpeningCreated}
+          >
+            <Button onClick={() => setIsDialogOpen(true)} className="flex-shrink-0">
+              <PlusCircle className="mr-2 h-5 w-5" />
+              Post Opening
+            </Button>
+          </CreateOpeningDialog>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {teamOpenings.map((opening) => {
-            const author = users.find(u => u.id === opening.authorId);
-            return (
-          <Card key={opening.id} className="flex flex-col">
-            <CardHeader>
-              <CardTitle>{opening.title}</CardTitle>
-              <CardDescription>
-                Posted by {author?.name} • {formatDistanceToNow(opening.createdAt, { addSuffix: true })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <p className="text-sm text-muted-foreground mb-4">{opening.projectIdea}</p>
-              
-              <div className="mb-4">
-                <h4 className="font-semibold text-sm mb-2">Required Roles:</h4>
-                <div className="flex flex-wrap gap-2">
-                    {opening.requiredRoles.map(role => (
-                        <Badge key={role} variant="secondary">{role}</Badge>
-                    ))}
+      {filteredOpenings.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+            {filteredOpenings.map((opening) => {
+                const author = users.find(u => u.id === opening.authorId);
+                return (
+            <Card key={opening.id} className="flex flex-col">
+                <CardHeader>
+                <CardTitle>{opening.title}</CardTitle>
+                <CardDescription>
+                    Posted by {author?.name} • {formatDistanceToNow(opening.createdAt, { addSuffix: true })}
+                </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                <p className="text-sm text-muted-foreground mb-4">{opening.projectIdea}</p>
+                
+                <div className="mb-4">
+                    <h4 className="font-semibold text-sm mb-2">Required Roles:</h4>
+                    <div className="flex flex-wrap gap-2">
+                        {opening.requiredRoles.map(role => (
+                            <Badge key={role} variant="secondary">{role}</Badge>
+                        ))}
+                    </div>
                 </div>
-              </div>
 
-              <div>
-                <h4 className="font-semibold text-sm mb-2">Tech Stack:</h4>
-                <div className="flex flex-wrap gap-2">
-                    {opening.techStack.map(tech => (
-                        <Badge key={tech} variant="outline">{tech}</Badge>
-                    ))}
+                <div>
+                    <h4 className="font-semibold text-sm mb-2">Tech Stack:</h4>
+                    <div className="flex flex-wrap gap-2">
+                        {opening.techStack.map(tech => (
+                            <Badge key={tech} variant="outline">{tech}</Badge>
+                        ))}
+                    </div>
                 </div>
-              </div>
 
-            </CardContent>
-            <CardFooter>
-              <Button 
-                className="w-full"
-                onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
-              >
-                Express Interest
-              </Button>
-            </CardFooter>
-          </Card>
-        )})}
-      </div>
+                </CardContent>
+                <CardFooter>
+                <Button 
+                    className="w-full"
+                    onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
+                >
+                    Express Interest
+                </Button>
+                </CardFooter>
+            </Card>
+            )})}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-20 text-center">
+            <h3 className="text-xl font-semibold">No openings found</h3>
+            <p className="mt-2 text-muted-foreground">
+                Try adjusting your search terms or post a new opening!
+            </p>
+        </div>
+      )}
     </div>
   );
 }

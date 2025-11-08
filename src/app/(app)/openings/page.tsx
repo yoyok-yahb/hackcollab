@@ -5,29 +5,46 @@ import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening, getUserById } from '@/lib/data';
+import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening, getUserById, deleteTeamOpening, removeMemberFromOpening } from '@/lib/data';
 import { format, formatDistanceToNow } from 'date-fns';
-import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon } from 'lucide-react';
+import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Edit, Trash2, X } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { EditOpeningDialog } from '@/components/edit-opening-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 export default function OpeningsPage() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedOpening, setSelectedOpening] = useState<TeamOpening | null>(null);
   const [openings, setOpenings] = useState<TeamOpening[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [tick, setTick] = useState(0);
   const { toast } = useToast();
   const currentUser = getCurrentUser();
 
   useEffect(() => {
     setOpenings(getTeamOpenings());
-  }, []);
+  }, [tick]);
+
+  const forceRerender = () => setTick(t => t + 1);
 
   const handleOpeningCreated = () => {
-    setOpenings(getTeamOpenings());
+    forceRerender();
+  };
+  
+  const handleOpeningUpdated = () => {
+    forceRerender();
+  }
+
+  const handleEditClick = (opening: TeamOpening) => {
+    setSelectedOpening(opening);
+    setIsEditDialogOpen(true);
   };
   
   const handleExpressInterest = (openingAuthorId: string, openingId: string, openingTitle: string) => {
@@ -56,6 +73,24 @@ export default function OpeningsPage() {
     });
   }
 
+  const handleCloseOpening = (openingId: string) => {
+    deleteTeamOpening(openingId);
+    toast({
+        title: "Opening Closed",
+        description: "The team opening has been successfully closed."
+    });
+    forceRerender();
+  }
+
+  const handleRemoveMember = (openingId: string, userId: string, userName: string) => {
+    removeMemberFromOpening(openingId, userId);
+    toast({
+        title: "Member Removed",
+        description: `${userName} has been removed from the team.`
+    });
+    forceRerender();
+  }
+
   const filteredOpenings = openings.filter(opening => {
     const searchLower = searchTerm.toLowerCase();
     const author = users.find(u => u.id === opening.authorId);
@@ -73,7 +108,7 @@ export default function OpeningsPage() {
   const yourOpenings = filteredOpenings.filter(o => o.authorId === currentUser.id);
   const otherOpenings = filteredOpenings.filter(o => o.authorId !== currentUser.id);
 
-  const renderOpeningCard = (opening: TeamOpening) => {
+  const renderOpeningCard = (opening: TeamOpening, isMyOpening: boolean) => {
     const author = users.find(u => u.id === opening.authorId);
     const deadlineDate = new Date(opening.deadline);
     const createdAtDate = new Date(opening.createdAt);
@@ -123,7 +158,14 @@ export default function OpeningsPage() {
                         <h4 className="font-semibold text-sm flex items-center"><UsersIcon className="mr-2 h-4 w-4"/> Team Members:</h4>
                         <div className="flex flex-wrap gap-2">
                             {approvedMembers.map(member => (
-                                <Badge key={member.id} variant="default">{member.name}</Badge>
+                                <Badge key={member.id} variant="default" className="relative pr-6 group">
+                                    {member.name}
+                                    {isMyOpening && (
+                                        <button onClick={() => handleRemoveMember(opening.id, member.id, member.name)} className="absolute right-1 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-primary-foreground text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    )}
+                                </Badge>
                             ))}
                         </div>
                     </div>
@@ -131,13 +173,42 @@ export default function OpeningsPage() {
 
             </CardContent>
             <CardFooter>
-            <Button 
-                className="w-full"
-                onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
-                disabled={new Date() > deadlineDate}
-            >
-                {new Date() > deadlineDate ? 'Deadline Passed' : 'Express Interest'}
-            </Button>
+            {isMyOpening ? (
+                <div className="w-full flex gap-2">
+                    <Button className="w-full" variant="outline" onClick={() => handleEditClick(opening)}>
+                        <Edit className="mr-2 h-4 w-4" /> Edit
+                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button className="w-full" variant="destructive">
+                                <Trash2 className="mr-2 h-4 w-4" /> Close
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete your opening and remove all associated data.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleCloseOpening(opening.id)}>
+                                    Continue
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            ) : (
+                <Button 
+                    className="w-full"
+                    onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
+                    disabled={new Date() > deadlineDate}
+                >
+                    {new Date() > deadlineDate ? 'Deadline Passed' : 'Express Interest'}
+                </Button>
+            )}
             </CardFooter>
         </Card>
     )
@@ -159,11 +230,11 @@ export default function OpeningsPage() {
              />
            </div>
            <CreateOpeningDialog 
-            open={isDialogOpen} 
-            onOpenChange={setIsDialogOpen}
+            open={isCreateDialogOpen} 
+            onOpenChange={setIsCreateDialogOpen}
             onOpeningCreated={handleOpeningCreated}
           >
-            <Button onClick={() => setIsDialogOpen(true)} className="flex-shrink-0">
+            <Button onClick={() => setIsCreateDialogOpen(true)} className="flex-shrink-0">
               <PlusCircle className="mr-2 h-5 w-5" />
               Post Opening
             </Button>
@@ -171,13 +242,23 @@ export default function OpeningsPage() {
         </div>
       </div>
       
+      {selectedOpening && (
+          <EditOpeningDialog 
+            key={selectedOpening.id}
+            open={isEditDialogOpen}
+            onOpenChange={setIsEditDialogOpen}
+            onOpeningUpdated={handleOpeningUpdated}
+            opening={selectedOpening}
+          />
+      )}
+
       <Accordion type="multiple" defaultValue={['your-openings', 'other-openings']} className="w-full space-y-6">
         <AccordionItem value="your-openings">
             <AccordionTrigger className="text-xl font-semibold">Your Openings</AccordionTrigger>
             <AccordionContent>
                 {yourOpenings.length > 0 ? (
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-                        {yourOpenings.map(renderOpeningCard)}
+                        {yourOpenings.map(opening => renderOpeningCard(opening, true))}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-10 text-center">
@@ -195,7 +276,7 @@ export default function OpeningsPage() {
             <AccordionContent>
                  {otherOpenings.length > 0 ? (
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-                        {otherOpenings.map(renderOpeningCard)}
+                        {otherOpenings.map(opening => renderOpeningCard(opening, false))}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 py-10 text-center">

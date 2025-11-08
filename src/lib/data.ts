@@ -353,6 +353,23 @@ export const addTeamOpening = (opening: Omit<TeamOpening, 'id' | 'createdAt' | '
     return newOpening;
 }
 
+export const updateTeamOpening = (updatedOpening: TeamOpening) => {
+  let openings = getTeamOpenings();
+  const openingIndex = openings.findIndex(o => o.id === updatedOpening.id);
+
+  if (openingIndex !== -1) {
+    openings[openingIndex] = updatedOpening;
+    saveTeamOpenings(openings);
+  }
+};
+
+export const deleteTeamOpening = (openingId: string) => {
+  let openings = getTeamOpenings();
+  openings = openings.filter(o => o.id !== openingId);
+  saveTeamOpenings(openings);
+};
+
+
 export const approveMemberForOpening = (openingId: string, userId: string) => {
   let openings = getTeamOpenings();
   const openingIndex = openings.findIndex(o => o.id === openingId);
@@ -373,6 +390,32 @@ export const approveMemberForOpening = (openingId: string, userId: string) => {
             conversationId: `conv-group-${openingId}`,
             senderId: 'system',
             text: `${user.name} has been added to the team.`
+        });
+      }
+    }
+  }
+};
+
+export const removeMemberFromOpening = (openingId: string, userId: string) => {
+  let openings = getTeamOpenings();
+  const openingIndex = openings.findIndex(o => o.id === openingId);
+
+  if (openingIndex !== -1) {
+    const opening = openings[openingIndex];
+    const user = getUserById(userId);
+    const initialMemberCount = opening.approvedMembers.length;
+    
+    opening.approvedMembers = opening.approvedMembers.filter(id => id !== userId);
+    
+    if (opening.approvedMembers.length < initialMemberCount) {
+      openings[openingIndex] = opening;
+      saveTeamOpenings(openings);
+
+      if (user) {
+        addMessage({
+            conversationId: `conv-group-${openingId}`,
+            senderId: 'system',
+            text: `${user.name} has been removed from the team.`
         });
       }
     }

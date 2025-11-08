@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,8 @@ const getMockMessages = (otherUser: User) => {
 }
 
 
-export default function ChatPage({ params }: { params: { id: string } }) {
+export default function ChatPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = use(paramsPromise);
   const { toast } = useToast();
   const [icebreakerLoading, setIcebreakerLoading] = useState(false);
   const [inputMessage, setInputMessage] = useState('');

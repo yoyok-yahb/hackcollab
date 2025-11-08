@@ -18,7 +18,13 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +36,8 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { getCurrentUser } from '@/lib/data';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 const navItems = [
   { href: '/discover', icon: Sparkles, label: 'For You' },
@@ -38,10 +46,18 @@ const navItems = [
   { href: '/profile', icon: UserIcon, label: 'Profile' },
 ];
 
-export function AppShell({ children, onLogout }: { children: React.ReactNode, onLogout: () => void }) {
+export function AppShell({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
   const pathname = usePathname();
-  const currentUser = getCurrentUser();
+  const { user, loading, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  const currentUser = user ? getCurrentUser() : null;
 
   const getPageTitle = () => {
     const item = navItems.find(item => pathname.startsWith(item.href));
@@ -49,6 +65,15 @@ export function AppShell({ children, onLogout }: { children: React.ReactNode, on
     if (pathname.startsWith('/messages/')) return 'Messages';
     if (pathname.startsWith('/matches')) return 'Your Matches';
     return item?.label || 'Hackathon TeamUp';
+  }
+  
+  if (loading || !currentUser) {
+    return (
+        <div className="flex h-screen w-screen flex-col items-center justify-center bg-background text-foreground">
+            <Icons.logo className="h-12 w-12 text-primary animate-pulse" />
+            <p className="mt-4 text-lg">Loading your experience...</p>
+        </div>
+    )
   }
 
   if (isMobile) {
@@ -76,6 +101,9 @@ export function AppShell({ children, onLogout }: { children: React.ReactNode, on
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-60 p-4">
+                <SheetHeader>
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                </SheetHeader>
                 <nav className="flex flex-col gap-2">
                   {navItems.map((item) => (
                     <Link
@@ -201,7 +229,7 @@ export function AppShell({ children, onLogout }: { children: React.ReactNode, on
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={onLogout}>Log Out</AlertDialogAction>
+                    <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
       </AlertDialog>

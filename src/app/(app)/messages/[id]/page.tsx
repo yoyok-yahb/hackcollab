@@ -11,8 +11,15 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { generateIcebreaker } from '@/ai/flows/icebreaker-tool';
 
+type Message = {
+  id: string;
+  sender: User;
+  text: string;
+  time: string;
+};
+
 // Mock messages for a conversation
-const getMockMessages = (otherUser: User) => {
+const getMockMessages = (otherUser: User): Message[] => {
     const currentUser = getCurrentUser();
     return [
         { id: '1', sender: otherUser, text: 'Hey! I saw your profile, you seem like a great fit for our project.', time: '10:30 AM' },
@@ -30,13 +37,14 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
   const conversations = getConversations();
   const currentConversation = conversations.find(c => c.conversationId === params.id);
   const currentUser = getCurrentUser();
-  
+    
   if (!currentConversation) {
     return <div className="p-4">Conversation not found.</div>;
   }
   
   const otherUser = currentConversation.otherUser;
-  const messages = getMockMessages(otherUser);
+  const [messages, setMessages] = useState<Message[]>(() => getMockMessages(otherUser));
+
 
   const handleGenerateIcebreaker = async () => {
     setIcebreakerLoading(true);
@@ -59,6 +67,21 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
     } finally {
         setIcebreakerLoading(false);
     }
+  }
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputMessage.trim()) return;
+
+    const newMessage: Message = {
+      id: `msg-${Date.now()}`,
+      sender: currentUser,
+      text: inputMessage.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages([...messages, newMessage]);
+    setInputMessage('');
   }
 
 
@@ -112,7 +135,7 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
         </div>
       </ScrollArea>
       <footer className="border-t bg-background p-4">
-        <div className="relative">
+        <form onSubmit={handleSendMessage} className="relative">
           <Input
             placeholder="Type a message..."
             className="pr-24"
@@ -120,7 +143,7 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
             onChange={(e) => setInputMessage(e.target.value)}
           />
           <div className="absolute inset-y-0 right-0 flex items-center">
-            <Button variant="ghost" size="icon" onClick={handleGenerateIcebreaker} disabled={icebreakerLoading}>
+            <Button variant="ghost" size="icon" type="button" onClick={handleGenerateIcebreaker} disabled={icebreakerLoading}>
               {icebreakerLoading ? <Loader2 className="h-5 w-5 animate-spin"/> : <Sparkles className="h-5 w-5 text-primary" />}
               <span className="sr-only">Generate Icebreaker</span>
             </Button>
@@ -129,7 +152,7 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
               <span className="sr-only">Send</span>
             </Button>
           </div>
-        </div>
+        </form>
       </footer>
     </div>
   );

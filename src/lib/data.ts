@@ -205,8 +205,8 @@ export const getCurrentUser = (): User => {
         if (savedUser) {
             const parsedUser = JSON.parse(savedUser);
             // Ensure image is correctly loaded if it's just an id
-            if (typeof parsedUser.image === 'string') {
-                parsedUser.image = getUserImage(parsedUser.image);
+            if (typeof parsedUser.image === 'string' || !parsedUser.image.imageUrl) {
+                parsedUser.image = getUserImage(parsedUser.image?.id || parsedUser.id || 'user1');
             }
              // Ensure projects array exists
             if (!parsedUser.projects) {
@@ -320,6 +320,9 @@ export const addMatch = (match: Omit<Match, 'id' | 'createdAt'>) => {
   };
   matches.push(newMatch);
   saveMatches();
+  // Also create a conversation
+  addConversationPlaceholder(newMatch);
+
   return newMatch;
 };
 
@@ -351,9 +354,19 @@ const saveMessages = () => {
     }
 }
 
+const addConversationPlaceholder = (match: Match) => {
+    const opening = teamOpenings.find(o => o.id === match.teamOpeningId);
+    addMessage({
+        conversationId: `conv-${match.id}`,
+        senderId: 'system',
+        text: `You matched for "${opening?.title || 'a project'}". Say hi!`
+    });
+}
+
+
 export const getMessagesForConversation = (conversationId: string) => {
     return messages
-        .filter(m => m.conversationId === conversationId)
+        .filter(m => m.conversationId === conversationId && m.senderId !== 'system')
         .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 }
 
@@ -369,8 +382,10 @@ export const addMessage = (message: Omit<Message, 'id' | 'createdAt'>) => {
 }
 
 const getLastMessageForConversation = (conversationId: string): Message | undefined => {
-    const convMessages = getMessagesForConversation(conversationId);
-    return convMessages[convMessages.length - 1];
+    const convMessages = messages
+        .filter(m => m.conversationId === conversationId)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return convMessages[0];
 }
 
 

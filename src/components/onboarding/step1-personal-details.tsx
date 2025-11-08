@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, Github, Linkedin, Twitter } from 'lucide-react';
+import { Upload, Github, Linkedin, Twitter, Image as ImageIcon } from 'lucide-react';
 import type { User } from '@/lib/data';
 import { Textarea } from '../ui/textarea';
+import Image from 'next/image';
 
 interface OnboardingStepProps {
   onNext: () => void;
@@ -15,6 +16,19 @@ interface OnboardingStepProps {
 }
 
 export function OnboardingStep1({ onNext, data, setData }: OnboardingStepProps) {
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageUrl = reader.result as string;
+        setData({ ...data, image: { ...data.image!, imageUrl, imageHint: 'person portrait' } });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -39,15 +53,24 @@ export function OnboardingStep1({ onNext, data, setData }: OnboardingStepProps) 
         <div className="space-y-2">
             <Label>Profile Photo</Label>
             <div className="flex items-center justify-center w-full">
-                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                        <p className="text-xs text-muted-foreground">SVG, PNG, JPG or GIF</p>
-                    </div>
-                    <Input id="dropzone-file" type="file" className="hidden" />
+                <label htmlFor="dropzone-file" className="relative flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent overflow-hidden">
+                    {data.image?.imageUrl && !data.image.imageUrl.includes('picsum.photos') ? (
+                       <>
+                        <Image src={data.image.imageUrl} alt="Profile preview" fill className="object-cover" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 hover:opacity-100 transition-opacity">
+                           <ImageIcon className="h-6 w-6 mr-2" /> Change Photo
+                        </div>
+                       </>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p className="text-xs text-muted-foreground">SVG, PNG, JPG or GIF</p>
+                        </div>
+                    )}
+                    <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageUpload} accept="image/*"/>
                 </label>
-            </div> 
+            </div>
         </div>
         <div className="space-y-2">
           <Label>Social Media Links (Optional)</Label>

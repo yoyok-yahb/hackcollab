@@ -6,20 +6,20 @@ import Link from 'next/link';
 import { getTeamOpenings, getUserById, User, Task, getTasksForOpening, updateTask } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, PlusCircle, Calendar as CalendarIcon, User as UserIcon } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Calendar as CalendarIcon, User as UserIcon, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { CreateTaskDialog } from '@/components/create-task-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
+import { EditTaskDialog } from '@/components/edit-task-dialog';
 
 export default function GroupTasksPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const params = use(paramsPromise);
@@ -94,12 +94,12 @@ export default function GroupTasksPage({ params: paramsPromise }: { params: Prom
                     {tasks.map(task => {
                         const assignee = getAssignee(task.assignedTo);
                         return (
-                            <div key={task.id} className="flex items-center gap-4 rounded-lg border p-4">
+                            <div key={task.id} className="flex items-start sm:items-center gap-4 rounded-lg border p-4 flex-col sm:flex-row">
                                 <Checkbox 
                                     id={`task-${task.id}`} 
                                     checked={task.status === 'Completed'}
                                     onCheckedChange={(checked) => handleTaskStatusChange(task, !!checked)}
-                                    className="h-6 w-6"
+                                    className="h-6 w-6 mt-1 sm:mt-0"
                                 />
                                 <div className="flex-1 grid gap-1">
                                     <label 
@@ -108,7 +108,7 @@ export default function GroupTasksPage({ params: paramsPromise }: { params: Prom
                                     >
                                         {task.description}
                                     </label>
-                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                    <div className="flex items-center flex-wrap gap-4 text-sm text-muted-foreground">
                                         <Badge 
                                             variant={task.status === 'Completed' ? 'default' : task.status === 'Ongoing' ? 'secondary' : 'outline'}
                                             className={cn(task.status === 'Completed' && 'bg-green-600 hover:bg-green-700')}
@@ -118,7 +118,7 @@ export default function GroupTasksPage({ params: paramsPromise }: { params: Prom
                                         {task.deadline && (
                                             <div className="flex items-center gap-1">
                                                 <CalendarIcon className="h-4 w-4" />
-                                                <span>{format(task.deadline, 'MMM d')}</span>
+                                                <span>{format(new Date(task.deadline), 'MMM d')}</span>
                                             </div>
                                         )}
                                         {assignee && (
@@ -138,6 +138,12 @@ export default function GroupTasksPage({ params: paramsPromise }: { params: Prom
                                         )}
                                     </div>
                                 </div>
+                                <EditTaskDialog task={task} teamMembers={allMembers} onTaskUpdated={forceRerender}>
+                                    <Button variant="outline" size="sm">
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </Button>
+                                </EditTaskDialog>
                             </div>
                         )
                     })}

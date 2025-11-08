@@ -82,19 +82,24 @@ export function RateTeammateDialog({ children, teammate, onRated }: RateTeammate
             {[...Array(5)].map((_, index) => {
               const starValue = index + 1;
               return (
-                <Star
+                <button
+                  type="button"
                   key={starValue}
-                  size={32}
-                  className={cn(
-                    'cursor-pointer transition-colors',
-                    starValue <= (hoverRating || rating)
-                      ? 'text-amber-400 fill-amber-400'
-                      : 'text-gray-300'
-                  )}
+                  className="p-0 bg-transparent border-none"
                   onClick={() => setRating(starValue)}
                   onMouseEnter={() => setHoverRating(starValue)}
                   onMouseLeave={() => setHoverRating(0)}
-                />
+                >
+                  <Star
+                    size={32}
+                    className={cn(
+                      'cursor-pointer transition-colors',
+                      starValue <= (hoverRating || rating)
+                        ? 'text-amber-400 fill-amber-400'
+                        : 'text-gray-300'
+                    )}
+                  />
+                </button>
               );
             })}
           </div>
@@ -109,5 +114,3 @@ export function RateTeammateDialog({ children, teammate, onRated }: RateTeammate
     </Dialog>
   );
 }
-
-    

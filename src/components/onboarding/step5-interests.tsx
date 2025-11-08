@@ -24,7 +24,7 @@ export function OnboardingStep5({ onNext, onBack, data, setData }: OnboardingSte
 
   const handleNext = () => {
     const combinedInterests = [...new Set([...selectedInterests, ...otherHobbies.split(',').map(s => s.trim()).filter(Boolean)])];
-    setData({ preferences: combinedInterests });
+    setData({ ...data, preferences: combinedInterests });
     onNext();
   };
 
@@ -60,7 +60,7 @@ export function OnboardingStep5({ onNext, onBack, data, setData }: OnboardingSte
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={onBack}>Back</Button>
-        <Button onClick={handleNext}>Finish Onboarding</Button>
+        <Button onClick={handleNext}>Finish</Button>
       </CardFooter>
     </Card>
   );

@@ -41,51 +41,55 @@ export function ProfileVerification({ user }: { user: User }) {
   };
 
   return (
-    <div>
-      <h3 className="font-semibold text-lg mb-2">Profile Verification</h3>
-      <div className="flex items-start gap-4">
-        <Button onClick={handleVerification} disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          ) : (
-            <ShieldCheck className="mr-2 h-5 w-5" />
-          )}
-          Analyze Profile with AI
-        </Button>
-      </div>
-
-      {result && (
-        <Alert className="mt-4" variant={result.isLegitimate ? "default" : "destructive"}>
-            {result.isLegitimate ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
-          <AlertTitle className="flex items-center justify-between">
-            {result.isLegitimate ? 'Profile Appears Legitimate' : 'Potential Issues Found'}
-            <Popover>
-                <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                        <Info className="h-4 w-4" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                    <div className="grid gap-4">
-                        <div className="space-y-2">
-                            <h4 className="font-medium leading-none">AI Reasoning</h4>
-                            <p className="text-sm text-muted-foreground">{result.reasoning}</p>
-                        </div>
-                    </div>
-                </PopoverContent>
-            </Popover>
-          </AlertTitle>
-          {result.flags.length > 0 && (
-            <AlertDescription>
-                <ul className="list-disc list-inside mt-2">
-                    {result.flags.map((flag, index) => (
-                        <li key={index}>{flag}</li>
-                    ))}
-                </ul>
-            </AlertDescription>
-          )}
-        </Alert>
-      )}
+    <div className="mt-6">
+      <Card>
+        <CardHeader>
+            <CardTitle>AI Profile Analysis</CardTitle>
+            <CardDescription>Use AI to check for completeness and potential red flags.</CardDescription>
+        </CardHeader>
+        <CardContent>
+             <Button onClick={handleVerification} disabled={isLoading}>
+                {isLoading ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                    <ShieldCheck className="mr-2 h-5 w-5" />
+                )}
+                Analyze Profile with AI
+            </Button>
+            {result && (
+                <Alert className="mt-4" variant={result.isLegitimate ? "default" : "destructive"}>
+                    {result.isLegitimate ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+                <AlertTitle className="flex items-center justify-between">
+                    {result.isLegitimate ? 'Profile Appears Legitimate' : 'Potential Issues Found'}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                                <Info className="h-4 w-4" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                            <div className="grid gap-4">
+                                <div className="space-y-2">
+                                    <h4 className="font-medium leading-none">AI Reasoning</h4>
+                                    <p className="text-sm text-muted-foreground">{result.reasoning}</p>
+                                </div>
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                </AlertTitle>
+                {result.flags.length > 0 && (
+                    <AlertDescription>
+                        <ul className="list-disc list-inside mt-2 space-y-1">
+                            {result.flags.map((flag, index) => (
+                                <li key={index}>{flag}</li>
+                            ))}
+                        </ul>
+                    </AlertDescription>
+                )}
+                </Alert>
+            )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

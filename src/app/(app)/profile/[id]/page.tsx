@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { getUserById, User } from '@/lib/data';
 import { ArrowLeft, Github, Linkedin, Pencil, Twitter } from 'lucide-react';
 import Link from 'next/link';
+import { ProfileVerification } from '@/components/profile-verification';
+import { getCurrentUser } from '@/lib/data';
 
 function UserProfile({ user }: { user: User }) {
     return (
@@ -65,6 +67,7 @@ function UserProfile({ user }: { user: User }) {
 export default function ProfilePage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
   const params = use(paramsPromise);
   const user = getUserById(params.id);
+  const currentUser = getCurrentUser();
 
   if (!user) {
     return (
@@ -77,6 +80,9 @@ export default function ProfilePage({ params: paramsPromise }: { params: Promise
     )
   }
 
+  // Don't show verification for the current user's own profile page
+  const isOwnProfile = user.id === currentUser.id;
+
   return (
     <div className="container mx-auto p-4 md:p-6">
         <div className="mb-4">
@@ -88,6 +94,10 @@ export default function ProfilePage({ params: paramsPromise }: { params: Promise
             </Button>
         </div>
         <UserProfile user={user} />
+
+        {!isOwnProfile && (
+            <ProfileVerification user={user} />
+        )}
     </div>
   );
 }

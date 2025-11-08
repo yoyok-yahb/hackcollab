@@ -208,19 +208,8 @@ export const saveCurrentUser = (user: User) => {
     
     // Check if the image is a large base64 string. If so, don't save it to avoid quota errors.
     // In a real app, you would upload this to a storage service and save the URL.
-    if (userToSave.image.imageUrl && userToSave.image.imageUrl.startsWith('data:image') && userToSave.image.imageUrl.length > 1024 * 100) { // 100KB limit
-        // Get the previous user data to revert the image if needed, or assign a new placeholder
-        try {
-            const oldUserRaw = localStorage.getItem('currentUser');
-            if(oldUserRaw){
-                const oldUserData = JSON.parse(oldUserRaw);
-                userToSave.image = oldUserData.image || getUserImage('user1');
-            } else {
-                 userToSave.image = getUserImage('user1');
-            }
-        } catch (e) {
-            userToSave.image = getUserImage('user1');
-        }
+    if (userToSave.image.imageUrl && userToSave.image.imageUrl.startsWith('data:image')) {
+       userToSave.image.imageUrl = `https://picsum.photos/seed/${Date.now()}/200/200`;
     }
 
     localStorage.setItem('currentUser', JSON.stringify(userToSave));
@@ -280,9 +269,10 @@ let teamOpenings: TeamOpening[] = [
     authorId: 'user3',
     hackathonName: 'AI Finance Hack',
     location: 'Remote',
+    hackathonLink: 'https://example.com/hackathon/ai-finance',
     problemStatement: 'Build a mobile app that uses AI to analyze spending habits and provide personalized financial advice.',
-    requiredRoles: ['Frontend Developer', 'UI/UX Designer'],
-    techStack: ['React Native', 'Python', 'TensorFlow', 'Figma'],
+    requiredRoles: ['Frontend Developer', 'UI/UX Designer', 'Data Scientist'],
+    techStack: ['React Native', 'Python', 'TensorFlow', 'Figma', 'Firebase'],
     deadline: new Date('2024-08-15T23:59:59Z'),
     hackathonEndDate: new Date('2024-08-18T17:00:00Z'),
     createdAt: new Date('2024-07-20T10:00:00Z'),
@@ -295,9 +285,10 @@ let teamOpenings: TeamOpening[] = [
     authorId: 'user4',
     hackathonName: 'NYC Connect',
     location: 'New York, NY',
+    hackathonLink: 'https://example.com/hackathon/nyc-connect',
     problemStatement: 'A platform to help people discover and join local events and community activities, with a focus on spontaneous meetups.',
-    requiredRoles: ['Full-stack Developer', 'Mobile Developer'],
-    techStack: ['Next.js', 'Firebase', 'Swift', 'Kotlin'],
+    requiredRoles: ['Full-stack Developer', 'Mobile Developer (iOS)'],
+    techStack: ['Next.js', 'Firebase', 'Swift', 'Mapbox API'],
     deadline: new Date('2024-08-01T23:59:59Z'),
     hackathonEndDate: new Date('2024-08-04T17:00:00Z'),
     createdAt: new Date('2024-07-19T14:30:00Z'),
@@ -310,9 +301,10 @@ let teamOpenings: TeamOpening[] = [
     authorId: 'user2',
     hackathonName: 'Language Gamify',
     location: 'San Francisco, CA',
+    hackathonLink: 'https://example.com/hackathon/lang-gamify',
     problemStatement: 'Create an engaging language learning app that uses gamification, leaderboards, and interactive stories to make learning fun.',
-    requiredRoles: ['Backend Developer', 'Data Scientist'],
-    techStack: ['Node.js', 'PostgreSQL', 'Python', 'React'],
+    requiredRoles: ['Backend Developer (Node.js)', 'Data Scientist', 'Frontend Developer'],
+    techStack: ['Node.js', 'PostgreSQL', 'Python', 'React', 'D3.js'],
     deadline: new Date('2024-09-01T23:59:59Z'),
     hackathonEndDate: new Date('2024-09-04T17:00:00Z'),
     createdAt: new Date('2024-07-21T09:00:00Z'),
@@ -320,6 +312,38 @@ let teamOpenings: TeamOpening[] = [
     tasks: [],
     title: 'Language Gamify'
   },
+  {
+    id: 'opening4',
+    authorId: 'user7',
+    hackathonName: 'HealthTech Innovation 2024',
+    location: 'Boston, MA',
+    hackathonLink: 'https://example.com/hackathon/healthtech-2024',
+    problemStatement: 'Develop a wearable tech solution to monitor and improve posture for remote workers.',
+    requiredRoles: ['Firmware Engineer', 'Mobile Developer (Android)', 'Cloud Backend Engineer'],
+    techStack: ['C++', 'Kotlin', 'GCP', 'Bluetooth LE'],
+    deadline: new Date('2024-08-25T23:59:59Z'),
+    hackathonEndDate: new Date('2024-08-28T17:00:00Z'),
+    createdAt: new Date('2024-07-22T11:00:00Z'),
+    approvedMembers: [],
+    tasks: [],
+    title: 'HealthTech Innovation 2024'
+  },
+   {
+    id: 'opening5',
+    authorId: 'user6',
+    hackathonName: 'DeFi Future',
+    location: 'Remote',
+    hackathonLink: 'https://example.com/hackathon/defi-future',
+    problemStatement: 'Design a decentralized identity verification system using blockchain to enhance security and privacy in financial applications.',
+    requiredRoles: ['Blockchain Developer', 'Smart Contract Auditor', 'Frontend Dev (React)'],
+    techStack: ['Solidity', 'Ethereum', 'Hardhat', 'Next.js', 'ethers.js'],
+    deadline: new Date('2024-09-10T23:59:59Z'),
+    hackathonEndDate: new Date('2024-09-13T17:00:00Z'),
+    createdAt: new Date('2024-07-22T18:00:00Z'),
+    approvedMembers: [],
+    tasks: [],
+    title: 'DeFi Future'
+  }
 ];
 
 const parseOpeningDates = (openings: any[]): TeamOpening[] => {

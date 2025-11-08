@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { User } from '@/lib/data';
 import { addMatch, getCurrentUser, getTeamOpenings } from '@/lib/data';
 import { DiscoverCard } from './discover-card';
@@ -22,6 +22,10 @@ export function DiscoverCardStack({ users, onReset }: DiscoverCardStackProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const { toast } = useToast();
   const currentUser = getCurrentUser();
+
+  useEffect(() => {
+    setStack(users);
+  }, [users]);
 
   const handleSwipe = (liked: boolean, likedUser: User) => {
     if (isAnimating) return;

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Icons } from '@/components/icons';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, UserPlus } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -37,10 +37,6 @@ export default function LoginPage() {
              <Button onClick={handleLogin} className="w-full" size="lg">
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button onClick={handleLogin} className="w-full" size="lg" variant="outline">
-                Register as Mentor
-                <UserPlus className="ml-2 h-5 w-5" />
             </Button>
           </div>
           <p className="mt-4 px-8 text-center text-xs text-muted-foreground">

@@ -1,14 +1,28 @@
+'use client';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { getCurrentUser, User } from '@/lib/data';
+import { getCurrentUser } from '@/lib/data';
 import { Github, Linkedin, Pencil, Twitter, Briefcase, Award, Lightbulb } from 'lucide-react';
 import { ProfileVerification } from '@/components/profile-verification';
 import Link from 'next/link';
+import { useIsClient } from '@/hooks/use-is-client';
+import { Icons } from '@/components/icons';
 
 export default function ProfilePage() {
+  const isClient = useIsClient();
+
+  if (!isClient) {
+     return (
+        <div className="flex h-screen w-screen flex-col items-center justify-center bg-background text-foreground">
+            <Icons.logo className="h-12 w-12 text-primary animate-pulse" />
+            <p className="mt-4 text-lg">Loading your experience...</p>
+        </div>
+    )
+  }
+
   const user = getCurrentUser();
 
   return (
@@ -17,13 +31,13 @@ export default function ProfilePage() {
         <CardHeader className="flex flex-col md:flex-row items-start gap-6">
           <Avatar className="h-24 w-24 border">
             <AvatarImage src={user.image.imageUrl} alt={user.name} />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{user.name ? user.name.charAt(0) : 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="text-3xl">{user.name}, {user.age}</CardTitle>
-                <CardDescription className="mt-2 text-base">{user.bio}</CardDescription>
+                <CardTitle className="text-3xl">{user.name || "Your Name"}, {user.age || 'Age'}</CardTitle>
+                <CardDescription className="mt-2 text-base">{user.bio || 'Your bio will appear here. Add one by editing your profile!'}</CardDescription>
               </div>
               <Button asChild variant="outline" size="icon" className="flex-shrink-0 ml-4">
                 <Link href="/profile/edit">
@@ -33,17 +47,17 @@ export default function ProfilePage() {
               </Button>
             </div>
             <div className="mt-4 flex items-center gap-4">
-                {user.socialLinks.github && (
+                {user.socialLinks?.github && (
                     <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                         <Github className="h-6 w-6" />
                     </a>
                 )}
-                {user.socialLinks.linkedin && (
+                {user.socialLinks?.linkedin && (
                     <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                         <Linkedin className="h-6 w-6" />
                     </a>
                 )}
-                {user.socialLinks.twitter && (
+                {user.socialLinks?.twitter && (
                     <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                         <Twitter className="h-6 w-6" />
                     </a>
@@ -60,11 +74,15 @@ export default function ProfilePage() {
                         <CardTitle className="flex items-center gap-2"><Lightbulb className="h-6 w-6 text-primary" /> Skills</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                            {user.skills.map(skill => (
-                                <Badge key={skill} variant="secondary" className="text-base py-1 px-3">{skill}</Badge>
-                            ))}
-                        </div>
+                        {user.skills && user.skills.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                                {user.skills.map(skill => (
+                                    <Badge key={skill} variant="secondary" className="text-base py-1 px-3">{skill}</Badge>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-muted-foreground">No skills listed yet. Add some from the edit profile page!</p>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -74,6 +92,7 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent>
                         <p className="text-muted-foreground">{user.experience || "No hackathon experience listed yet."}</p>
+
                     </CardContent>
                 </Card>
 
@@ -93,11 +112,15 @@ export default function ProfilePage() {
                         <CardTitle>Interests & Hobbies</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                            {user.preferences.map(pref => (
-                                <Badge key={pref} variant="outline" className="text-base py-1 px-3">{pref}</Badge>
-                            ))}
-                        </div>
+                        {user.preferences && user.preferences.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                                {user.preferences.map(pref => (
+                                    <Badge key={pref} variant="outline" className="text-base py-1 px-3">{pref}</Badge>
+                                ))}
+                            </div>
+                        ) : (
+                             <p className="text-muted-foreground">No interests listed yet. Add some from the edit profile page!</p>
+                        )}
                     </CardContent>
                 </Card>
                  <Card>

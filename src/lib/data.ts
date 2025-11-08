@@ -203,16 +203,24 @@ const defaultUser: User = {
 // Function to save user data to local storage
 export const saveCurrentUser = (user: User) => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    const userToSave = { ...user };
 
-    const userIndex = users.findIndex(u => u.id === user.id);
+    // Prevent storing large base64 strings in localStorage
+    if (userToSave.image?.imageUrl?.startsWith('data:image')) {
+      // In a real app, you would upload this to a storage service and get a URL.
+      // For this mock app, we'll revert to a placeholder to avoid quota errors.
+      userToSave.image = getUserImage(userToSave.id) || getUserImage('user1');
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(userToSave));
+
+    const userIndex = users.findIndex(u => u.id === userToSave.id);
     if(userIndex > -1) {
-        users[userIndex] = user;
+        users[userIndex] = userToSave;
     } else {
-        users.push(user);
+        users.push(userToSave);
     }
     saveUsers();
-
   }
 };
 

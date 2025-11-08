@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, getTeamOpenings, users, addMatch, TeamOpening, getUserById, deleteTeamOpening, removeMemberFromOpening } from '@/lib/data';
 import { format, formatDistanceToNow } from 'date-fns';
-import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Trash2, X, Sparkles, Loader2 } from 'lucide-react';
+import { PlusCircle, Search, MapPin, CalendarClock, Users as UsersIcon, Trash2, X, Sparkles, Loader2, ExternalLink } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
@@ -30,8 +30,16 @@ export default function OpeningsPage() {
   const currentUser = getCurrentUser();
 
   useEffect(() => {
-    setOpenings(getTeamOpenings());
+    const allOpenings = getTeamOpenings();
+    const parsedOpenings = allOpenings.map(o => ({
+      ...o,
+      deadline: new Date(o.deadline),
+      createdAt: new Date(o.createdAt),
+      hackathonEndDate: new Date(o.hackathonEndDate)
+    }));
+    setOpenings(parsedOpenings);
   }, [tick]);
+
 
   const forceRerender = () => setTick(t => t + 1);
 
@@ -88,8 +96,8 @@ export default function OpeningsPage() {
     const author = users.find(u => u.id === opening.authorId);
 
     return (
-        opening.title.toLowerCase().includes(searchLower) ||
-        opening.projectIdea.toLowerCase().includes(searchLower) ||
+        (opening.hackathonName && opening.hackathonName.toLowerCase().includes(searchLower)) ||
+        (opening.problemStatement && opening.problemStatement.toLowerCase().includes(searchLower)) ||
         opening.location.toLowerCase().includes(searchLower) ||
         (author && author.name.toLowerCase().includes(searchLower)) ||
         opening.requiredRoles.some(role => role.toLowerCase().includes(searchLower)) ||
@@ -127,8 +135,8 @@ export default function OpeningsPage() {
 
   const renderOpeningCard = (opening: TeamOpening, isMyOpening: boolean) => {
     const author = users.find(u => u.id === opening.authorId);
-    const deadlineDate = new Date(opening.deadline);
-    const createdAtDate = new Date(opening.createdAt);
+    const deadlineDate = opening.deadline;
+    const createdAtDate = opening.createdAt;
     const approvedMembers = opening.approvedMembers?.map(id => getUserById(id)).filter(Boolean) as any[];
 
     return (
@@ -137,13 +145,21 @@ export default function OpeningsPage() {
                 <Badge className="absolute top-2 left-2 z-10" variant="default">Recommended</Badge>
             )}
             <CardHeader>
-            <CardTitle>{opening.title}</CardTitle>
-            <CardDescription>
-                Posted by {author?.name} • {formatDistanceToNow(createdAtDate, { addSuffix: true })}
+            <CardTitle>{opening.hackathonName}</CardTitle>
+            <CardDescription className="flex items-center justify-between">
+                <span>
+                    Posted by {author?.name} • {formatDistanceToNow(createdAtDate, { addSuffix: true })}
+                </span>
+                {opening.hackathonLink && (
+                    <a href={opening.hackathonLink} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-primary hover:underline">
+                        <ExternalLink className="mr-1 h-4 w-4" />
+                        Event
+                    </a>
+                )}
             </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-                <p className="text-sm text-muted-foreground">{opening.projectIdea}</p>
+                {opening.problemStatement && <p className="text-sm text-muted-foreground">{opening.problemStatement}</p>}
                 
                 <div className="flex items-center text-sm text-muted-foreground">
                     <MapPin className="mr-2 h-4 w-4" />
@@ -220,7 +236,7 @@ export default function OpeningsPage() {
             ) : (
                 <Button 
                     className="w-full"
-                    onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
+                    onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.hackathonName)}
                     disabled={new Date() > deadlineDate}
                 >
                     {new Date() > deadlineDate ? 'Deadline Passed' : 'Express Interest'}

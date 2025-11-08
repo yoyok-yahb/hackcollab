@@ -1,3 +1,4 @@
+
 'use client';
 
 import { use, useState } from 'react';
@@ -7,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CalendarClock, MapPin, Users as UsersIcon, X } from 'lucide-react';
+import { ArrowLeft, CalendarClock, MapPin, Users as UsersIcon, X, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -62,12 +63,20 @@ export default function GroupChatDetailsPage({ params: paramsPromise }: { params
         <div className="md:col-span-2">
             <Card>
                 <CardHeader>
-                <CardTitle>{opening.title}</CardTitle>
+                <CardTitle>{opening.hackathonName}</CardTitle>
                 <CardDescription>
-                    {opening.projectIdea}
+                    {opening.problemStatement}
                 </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    {opening.hackathonLink && (
+                         <div className="flex items-center text-sm">
+                           <a href={opening.hackathonLink} target="_blank" rel="noopener noreferrer" className="flex items-center text-primary hover:underline">
+                             <ExternalLink className="mr-2 h-4 w-4" />
+                             Hackathon Website
+                           </a>
+                         </div>
+                    )}
                     <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="mr-2 h-4 w-4" />
                         <span>{opening.location}</span>

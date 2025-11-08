@@ -38,7 +38,7 @@ export default function ChatPage({ params: paramsPromise }: { params: Promise<{ 
     openingDetails = allOpenings.find(o => o.id === openingId);
     if (openingDetails) {
         currentConversation = openingDetails;
-        chatTitle = openingDetails.title;
+        chatTitle = openingDetails.hackathonName;
         const author = getUserById(openingDetails.authorId);
         const members = openingDetails.approvedMembers.map(id => getUserById(id)).filter(Boolean) as User[];
         if (author) {

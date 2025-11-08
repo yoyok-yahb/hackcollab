@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from 'next/link';
@@ -87,7 +88,7 @@ export default function MessagesPage() {
                             </Avatar>
                             <div className="flex-1">
                             <div className="flex items-baseline justify-between">
-                                <p className="font-semibold">{opening.title}</p>
+                                <p className="font-semibold">{opening.hackathonName}</p>
                                 <p className="text-xs text-muted-foreground">
                                 {formatDistanceToNow(lastMessageAt, { addSuffix: true })}
                                 </p>

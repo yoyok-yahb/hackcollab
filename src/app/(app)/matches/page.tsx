@@ -1,3 +1,4 @@
+
 'use client'
 
 import Image from 'next/image';
@@ -43,7 +44,7 @@ export default function MatchesPage() {
   }, {} as Record<string, (User & {teamOpeningTitle: string, teamOpeningId: string, matchId: string})[]>);
 
   // Get all unique opening titles from user's own openings and their matches
-  const userOpeningTitles = allOpenings.filter(o => o.authorId === currentUser.id).map(o => o.title);
+  const userOpeningTitles = allOpenings.filter(o => o.authorId === currentUser.id).map(o => o.hackathonName);
   const matchedOpeningTitles = conversations.map(c => c.teamOpeningTitle);
   const allTabTitles = [...new Set([...userOpeningTitles, ...matchedOpeningTitles])];
 
@@ -73,7 +74,7 @@ export default function MatchesPage() {
   const findBestMatch = async (openingTitle: string, users: (User & {teamOpeningId: string})[]) => {
     setIsLoading(prev => ({...prev, [openingTitle]: true}));
     try {
-        const opening = allOpenings.find(o => o.title === openingTitle);
+        const opening = allOpenings.find(o => o.hackathonName === openingTitle);
         if (!opening) {
             toast({ variant: "destructive", title: "Error", description: "Could not find opening details." });
             return;
@@ -124,7 +125,7 @@ export default function MatchesPage() {
               </TabsList>
               {allTabTitles.map((title) => {
                 const usersForOpening = groupedMatches[title] || [];
-                const openingDetails = allOpenings.find(o => o.title === title);
+                const openingDetails = allOpenings.find(o => o.hackathonName === title);
                 const isMyOpening = openingDetails?.authorId === currentUser.id;
                 
                 return (

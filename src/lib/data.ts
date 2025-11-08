@@ -40,12 +40,13 @@ export interface Task {
 
 export interface TeamOpening {
   id: string;
-  title: string;
   authorId: string;
-  projectIdea: string;
+  hackathonName: string;
+  hackathonLink?: string;
+  location: string; // Venue
+  problemStatement?: string;
   requiredRoles: string[];
   techStack: string[];
-  location: string;
   deadline: Date;
   hackathonEndDate: Date;
   createdAt: Date;
@@ -257,12 +258,12 @@ export const getUserById = (id: string) => {
 let teamOpenings: TeamOpening[] = [
   {
     id: 'opening1',
-    title: 'AI-Powered Personal Finance Advisor',
     authorId: 'user3',
-    projectIdea: 'Build a mobile app that uses AI to analyze spending habits and provide personalized financial advice.',
+    hackathonName: 'AI Finance Hack',
+    location: 'Remote',
+    problemStatement: 'Build a mobile app that uses AI to analyze spending habits and provide personalized financial advice.',
     requiredRoles: ['Frontend Developer', 'UI/UX Designer'],
     techStack: ['React Native', 'Python', 'TensorFlow', 'Figma'],
-    location: 'Remote',
     deadline: new Date('2024-08-15T23:59:59Z'),
     hackathonEndDate: new Date('2024-08-18T17:00:00Z'),
     createdAt: new Date('2024-07-20T10:00:00Z'),
@@ -271,12 +272,12 @@ let teamOpenings: TeamOpening[] = [
   },
   {
     id: 'opening2',
-    title: 'Social App for Local Events',
     authorId: 'user4',
-    projectIdea: 'A platform to help people discover and join local events and community activities, with a focus on spontaneous meetups.',
+    hackathonName: 'NYC Connect',
+    location: 'New York, NY',
+    problemStatement: 'A platform to help people discover and join local events and community activities, with a focus on spontaneous meetups.',
     requiredRoles: ['Full-stack Developer', 'Mobile Developer'],
     techStack: ['Next.js', 'Firebase', 'Swift', 'Kotlin'],
-    location: 'New York, NY',
     deadline: new Date('2024-08-01T23:59:59Z'),
     hackathonEndDate: new Date('2024-08-04T17:00:00Z'),
     createdAt: new Date('2024-07-19T14:30:00Z'),
@@ -285,12 +286,12 @@ let teamOpenings: TeamOpening[] = [
   },
   {
     id: 'opening3',
-    title: 'Gamified Language Learning Platform',
     authorId: 'user2',
-    projectIdea: 'Create an engaging language learning app that uses gamification, leaderboards, and interactive stories to make learning fun.',
+    hackathonName: 'Language Gamify',
+    location: 'San Francisco, CA',
+    problemStatement: 'Create an engaging language learning app that uses gamification, leaderboards, and interactive stories to make learning fun.',
     requiredRoles: ['Backend Developer', 'Data Scientist'],
     techStack: ['Node.js', 'PostgreSQL', 'Python', 'React'],
-    location: 'San Francisco, CA',
     deadline: new Date('2024-09-01T23:59:59Z'),
     hackathonEndDate: new Date('2024-09-04T17:00:00Z'),
     createdAt: new Date('2024-07-21T09:00:00Z'),
@@ -501,7 +502,7 @@ const addConversationPlaceholder = (match: Match) => {
     addMessage({
         conversationId: conversationId,
         senderId: 'system',
-        text: `You matched for "${opening?.title || 'a project'}". Say hi!`
+        text: `You matched for "${opening?.hackathonName || 'a project'}". Say hi!`
     });
 }
 
@@ -513,7 +514,7 @@ const addGroupChatPlaceholder = (opening: TeamOpening) => {
     addMessage({
         conversationId,
         senderId: 'system',
-        text: `Group chat for "${opening.title}" created.`,
+        text: `Group chat for "${opening.hackathonName}" created.`,
     });
 };
 
@@ -560,8 +561,8 @@ export const getConversations = () => {
                 matchId: match.id,
                 teamOpeningId: teamOpening?.id,
                 otherUser,
-                teamOpeningTitle: teamOpening?.title || 'A Project',
-                lastMessage: lastMessage?.text || `You matched for ${teamOpening?.title || 'a project'}.`,
+                teamOpeningTitle: teamOpening?.hackathonName || 'A Project',
+                lastMessage: lastMessage?.text || `You matched for ${teamOpening?.hackathonName || 'a project'}.`,
                 lastMessageAt: lastMessage?.createdAt || match.createdAt
             }
         })
@@ -582,7 +583,7 @@ export const getGroupConversations = () => {
         return {
             conversationId,
             opening,
-            lastMessage: lastMessage?.text || `Group chat for "${opening.title}"`,
+            lastMessage: lastMessage?.text || `Group chat for "${opening.hackathonName}"`,
             lastMessageAt: lastMessage?.createdAt || opening.createdAt,
         };
     })

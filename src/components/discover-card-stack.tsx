@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -32,10 +33,10 @@ export function DiscoverCardStack({ users }: { users: User[] }) {
 
       toast({
         title: "It's a match!",
-        description: `You and ${likedUser.name} are matched for "${teamOpening.title}".`,
+        description: `You and ${likedUser.name} are matched for "${teamOpening.hackathonName}".`,
         action: (
           <ToastAction asChild altText="Message">
-            <Link href={`/messages/conv-${newMatch.id}`}>Message</Link>
+            <Link href={`/messages/conv-match-${newMatch.id}`}>Message</Link>
           </ToastAction>
         ),
       });

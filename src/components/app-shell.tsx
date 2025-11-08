@@ -156,63 +156,63 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
         </TooltipProvider>
       </aside>
-      <div className="flex flex-col">
-        <header className="flex h-14 items-center justify-between gap-4 border-b bg-background px-4 lg:px-6">
-            <h1 className="text-xl font-semibold capitalize">{getPageTitle()}</h1>
-            <div className="flex items-center gap-4">
-              {pathname === '/discover' && (
-                <Button variant="outline" asChild>
-                  <Link href="/matches">
-                    <Users className="mr-2 h-5 w-5" />
-                    Your Matches
-                  </Link>
-                </Button>
-              )}
-              <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-full">
-                          <Avatar className="h-8 w-8">
-                              <AvatarImage src={currentUser.image.imageUrl} alt={currentUser.name} />
-                              <AvatarFallback>{currentUser.name ? currentUser.name.charAt(0) : 'U'}</AvatarFallback>
-                          </Avatar>
-                      </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/profile">Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/settings">Settings</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                       <AlertDialog>
+       <AlertDialog>
+          <div className="flex flex-col">
+            <header className="flex h-14 items-center justify-between gap-4 border-b bg-background px-4 lg:px-6">
+                <h1 className="text-xl font-semibold capitalize">{getPageTitle()}</h1>
+                <div className="flex items-center gap-4">
+                  {pathname === '/discover' && (
+                    <Button variant="outline" asChild>
+                      <Link href="/matches">
+                        <Users className="mr-2 h-5 w-5" />
+                        Your Matches
+                      </Link>
+                    </Button>
+                  )}
+                  <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="rounded-full">
+                              <Avatar className="h-8 w-8">
+                                  <AvatarImage src={currentUser.image.imageUrl} alt={currentUser.name} />
+                                  <AvatarFallback>{currentUser.name ? currentUser.name.charAt(0) : 'U'}</AvatarFallback>
+                              </Avatar>
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link href="/profile">Profile</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/settings">Settings</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
                           <AlertDialogTrigger asChild>
                               <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600">
                                   <LogOut className="mr-2 h-4 w-4" />
                                   Logout
                               </DropdownMenuItem>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
-                              <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                      You will be returned to the login screen.
-                                  </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
-                              </AlertDialogFooter>
-                          </AlertDialogContent>
-                      </AlertDialog>
-                  </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-        </header>
-        <main className="flex-1 overflow-auto bg-muted/40">{children}</main>
-      </div>
+                      </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+            </header>
+            <main className="flex-1 overflow-auto bg-muted/40">{children}</main>
+          </div>
+          <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure you want to log out?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        You will be returned to the login screen.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

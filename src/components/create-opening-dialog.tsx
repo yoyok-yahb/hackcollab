@@ -16,7 +16,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { addTeamOpening, getCurrentUser } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Calendar } from './ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface CreateOpeningDialogProps {
   children: ReactNode;
@@ -30,6 +34,8 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
   const [projectIdea, setProjectIdea] = useState('');
   const [requiredRoles, setRequiredRoles] = useState('');
   const [techStack, setTechStack] = useState('');
+  const [location, setLocation] = useState('');
+  const [deadline, setDeadline] = useState<Date>();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const currentUser = getCurrentUser();
@@ -39,15 +45,17 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
     setProjectIdea('');
     setRequiredRoles('');
     setTechStack('');
+    setLocation('');
+    setDeadline(undefined);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !projectIdea) {
+    if (!title || !projectIdea || !location || !deadline) {
       toast({
         variant: 'destructive',
         title: 'Missing Fields',
-        description: 'Please fill out the title and project idea.',
+        description: 'Please fill out all fields, including location and deadline.',
       });
       return;
     }
@@ -60,6 +68,8 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
             authorId: currentUser.id,
             requiredRoles: requiredRoles.split(',').map(s => s.trim()).filter(Boolean),
             techStack: techStack.split(',').map(s => s.trim()).filter(Boolean),
+            location,
+            deadline,
         });
         
         toast({
@@ -86,7 +96,7 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Post a New Opening</DialogTitle>
@@ -112,6 +122,37 @@ export function CreateOpeningDialog({ children, open, onOpenChange, onOpeningCre
                 onChange={(e) => setProjectIdea(e.target.value)}
                 placeholder="Describe your vision for the project..."
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g., Remote or City, State"/>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="deadline">Application Deadline</Label>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                            variant={"outline"}
+                            className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !deadline && "text-muted-foreground"
+                            )}
+                            >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {deadline ? format(deadline, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                            mode="single"
+                            selected={deadline}
+                            onSelect={setDeadline}
+                            initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="required-roles">Required Roles</Label>

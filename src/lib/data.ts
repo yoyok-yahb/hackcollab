@@ -31,6 +31,8 @@ export interface TeamOpening {
   projectIdea: string;
   requiredRoles: string[];
   techStack: string[];
+  location: string;
+  deadline: Date;
   createdAt: Date;
 }
 
@@ -240,6 +242,8 @@ export let teamOpenings: TeamOpening[] = [
     projectIdea: 'Build a mobile app that uses AI to analyze spending habits and provide personalized financial advice.',
     requiredRoles: ['Frontend Developer', 'UI/UX Designer'],
     techStack: ['React Native', 'Python', 'TensorFlow', 'Figma'],
+    location: 'Remote',
+    deadline: new Date('2024-08-15T23:59:59Z'),
     createdAt: new Date('2024-07-20T10:00:00Z'),
   },
   {
@@ -249,6 +253,8 @@ export let teamOpenings: TeamOpening[] = [
     projectIdea: 'A platform to help people discover and join local events and community activities, with a focus on spontaneous meetups.',
     requiredRoles: ['Full-stack Developer', 'Mobile Developer'],
     techStack: ['Next.js', 'Firebase', 'Swift', 'Kotlin'],
+    location: 'New York, NY',
+    deadline: new Date('2024-08-01T23:59:59Z'),
     createdAt: new Date('2024-07-19T14:30:00Z'),
   },
   {
@@ -258,6 +264,8 @@ export let teamOpenings: TeamOpening[] = [
     projectIdea: 'Create an engaging language learning app that uses gamification, leaderboards, and interactive stories to make learning fun.',
     requiredRoles: ['Backend Developer', 'Data Scientist'],
     techStack: ['Node.js', 'PostgreSQL', 'Python', 'React'],
+    location: 'San Francisco, CA',
+    deadline: new Date('2024-09-01T23:59:59Z'),
     createdAt: new Date('2024-07-21T09:00:00Z'),
   },
 ];
@@ -265,7 +273,7 @@ export let teamOpenings: TeamOpening[] = [
 if (typeof window !== 'undefined') {
     const savedOpenings = localStorage.getItem('teamOpenings');
     if (savedOpenings) {
-        teamOpenings = JSON.parse(savedOpenings).map((o: any) => ({...o, createdAt: new Date(o.createdAt)}));
+        teamOpenings = JSON.parse(savedOpenings).map((o: any) => ({...o, createdAt: new Date(o.createdAt), deadline: new Date(o.deadline)}));
     }
 }
 

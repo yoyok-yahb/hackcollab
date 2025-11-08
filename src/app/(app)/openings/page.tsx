@@ -5,8 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCurrentUser, teamOpenings, users, addMatch } from '@/lib/data';
-import { formatDistanceToNow } from 'date-fns';
-import { PlusCircle, Search } from 'lucide-react';
+import { format, formatDistanceToNow } from 'date-fns';
+import { PlusCircle, Search, MapPin, CalendarClock } from 'lucide-react';
 import { CreateOpeningDialog } from '@/components/create-opening-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
@@ -58,6 +58,7 @@ export default function OpeningsPage() {
     return (
         opening.title.toLowerCase().includes(searchLower) ||
         opening.projectIdea.toLowerCase().includes(searchLower) ||
+        opening.location.toLowerCase().includes(searchLower) ||
         (author && author.name.toLowerCase().includes(searchLower)) ||
         opening.requiredRoles.some(role => role.toLowerCase().includes(searchLower)) ||
         opening.techStack.some(tech => tech.toLowerCase().includes(searchLower))
@@ -104,34 +105,45 @@ export default function OpeningsPage() {
                     Posted by {author?.name} • {formatDistanceToNow(opening.createdAt, { addSuffix: true })}
                 </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-grow">
-                <p className="text-sm text-muted-foreground mb-4">{opening.projectIdea}</p>
-                
-                <div className="mb-4">
-                    <h4 className="font-semibold text-sm mb-2">Required Roles:</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {opening.requiredRoles.map(role => (
-                            <Badge key={role} variant="secondary">{role}</Badge>
-                        ))}
+                <CardContent className="flex-grow space-y-4">
+                    <p className="text-sm text-muted-foreground">{opening.projectIdea}</p>
+                    
+                    <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="mr-2 h-4 w-4" />
+                        <span>{opening.location}</span>
                     </div>
-                </div>
 
-                <div>
-                    <h4 className="font-semibold text-sm mb-2">Tech Stack:</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {opening.techStack.map(tech => (
-                            <Badge key={tech} variant="outline">{tech}</Badge>
-                        ))}
+                    <div className="flex items-center text-sm text-muted-foreground">
+                        <CalendarClock className="mr-2 h-4 w-4" />
+                        <span>Apply by {format(opening.deadline, 'PPP')}</span>
                     </div>
-                </div>
+
+                    <div className="space-y-2">
+                        <h4 className="font-semibold text-sm">Required Roles:</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {opening.requiredRoles.map(role => (
+                                <Badge key={role} variant="secondary">{role}</Badge>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <h4 className="font-semibold text-sm">Tech Stack:</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {opening.techStack.map(tech => (
+                                <Badge key={tech} variant="outline">{tech}</Badge>
+                            ))}
+                        </div>
+                    </div>
 
                 </CardContent>
                 <CardFooter>
                 <Button 
                     className="w-full"
                     onClick={() => handleExpressInterest(opening.authorId, opening.id, opening.title)}
+                    disabled={new Date() > opening.deadline}
                 >
-                    Express Interest
+                    {new Date() > opening.deadline ? 'Deadline Passed' : 'Express Interest'}
                 </Button>
                 </CardFooter>
             </Card>

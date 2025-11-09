@@ -194,7 +194,7 @@ if (typeof window !== 'undefined') {
             const initialUser = initialUsers.find(iu => iu.id === user.id);
             // If the saved user has no rating or a zero rating, and there's an initial user with a rating, use the initial user's data.
             if (initialUser && (!user.rating || user.rating.count === 0)) {
-                return initialUser;
+                return { ...initialUser, ...user, rating: initialUser.rating };
             }
             // Otherwise, use the saved user, ensuring there's at least a default rating object.
             return {
@@ -239,7 +239,8 @@ export const saveCurrentUser = (user: User) => {
     // Check if the image is a large base64 string. If so, don't save it to avoid quota errors.
     // In a real app, you would upload this to a storage service and save the URL.
     if (userToSave.image.imageUrl && userToSave.image.imageUrl.startsWith('data:image')) {
-       userToSave.image.imageUrl = user.image.imageUrl;
+       // Replace the large base64 string with a placeholder URL to avoid storage quota errors.
+       userToSave.image = getUserImage('user1');
     }
 
     localStorage.setItem('currentUser', JSON.stringify(userToSave));

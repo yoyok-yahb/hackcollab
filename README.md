@@ -66,15 +66,11 @@ To get a local copy up and running, follow these simple steps.
 
 ### Installation & Running
 
-1.  Clone the repository:
-    ```sh
-    git clone https://github.com/your-username/hackathon-teamup.git
-    ```
-2.  Navigate to the project directory:
-    ```sh
-    cd hackathon-teamup
-    ```
-3.  Install NPM packages:
+1.  **Clone the Repository**
+    Clone the project repository to your local machine.
+
+2.  **Install Dependencies**
+    Navigate to the project directory and install the required packages:
     ```sh
     npm install
     ```
